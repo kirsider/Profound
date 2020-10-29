@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Profound.Data;
+using Profound.Data.Models;
 
 namespace Profound.Controllers
 {
@@ -11,14 +13,17 @@ namespace Profound.Controllers
     [ApiController]
     public class TestController : ControllerBase
     {
-        [HttpGet]
-        public IEnumerable<char> GetString(string queryString)
+        private readonly IDataRepository _dataRepository;
+
+        public TestController(IDataRepository dataRepository)
         {
-            queryString ??= "Hello, World!";
-            foreach (char ch in queryString)
-            {
-                yield return ch;
-            }
+            _dataRepository = dataRepository;
+        }
+
+        [HttpGet]
+        public IEnumerable<Role> GetRoles()
+        {
+            return _dataRepository.GetRoles();
         }
     }
 }
