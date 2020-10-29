@@ -167,5 +167,57 @@ namespace Profound.Data
                 );
             }
         }
+
+        public Comment GetComment(int commentId)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                return connection.QueryFirstOrDefault<Comment>(
+                    @"SELECT id, user_id AS userId, component_id AS componentId, text FROM Comment WHERE id=@CommentId;", 
+                    new { CommentId = commentId }
+                );
+            }
+        }
+
+        public Comment PostComment(Comment comment)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"INSERT INTO Comment( user_id, component_id, text) VALUES (@UserId, @ComponentId, @Text);", 
+                    new {comment.UserId, comment.ComponentId, comment.Text}
+                );
+                return connection.QueryFirst<Comment>(
+                    @"SELECT id, user_id AS userId, component_id AS componentId, text FROM Comment ORDER BY id DESC LIMIT 1;"
+                );
+            }
+        }
+
+        public Comment PutComment(int commentId, CommentPutRequest commentPutRequest)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"UPDATE Comment SET text = @Text WHERE id = @Id;",
+                    new { commentPutRequest.Text, Id = commentId }
+                );
+                return GetComment(commentId);
+            }
+        }
+
+        public void DeleteComment(int commentId)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"DELETE FROM Comment WHERE id = @Id;",
+                    new { Id = commentId }
+                );
+            }
+        }
     }
 }

@@ -8,6 +8,8 @@ namespace Profound.Data
 {
     public interface IDataRepository
     {
+        // GET Methods
+
         IEnumerable<Role> GetRoles();
         IEnumerable<User> GetUsers();
         IEnumerable<Course> GetCourses();
@@ -19,5 +21,18 @@ namespace Profound.Data
         User GetUser(int userId);
         Course GetCourse(int courseId);
         Category GetCategory(int categoryId);
+        Comment GetComment(int commentId);
+
+        // POST Methods
+
+        Comment PostComment(Comment comment);
+
+        // PUT Methods
+
+        Comment PutComment(int commentId, CommentPutRequest commentPutRequest);
+
+        // DELETE Methods
+
+        void DeleteComment(int commentId);
     }
 }
