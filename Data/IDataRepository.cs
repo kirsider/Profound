@@ -29,6 +29,8 @@ namespace Profound.Data
 
         Comment PostComment(Comment comment);
 
+        public Course PostEnrollment(UserCourseEnrollment enrollment);
+
         // PUT Methods
 
         Comment PutComment(int commentId, CommentPutRequest commentPutRequest);

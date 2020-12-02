@@ -9,7 +9,7 @@ using MySql.Data.MySqlClient;
 
 namespace Profound.Data
 {
-    public class DataRepository: IDataRepository
+    public class DataRepository : IDataRepository
     {
         private readonly string _connectionString;
 
@@ -18,7 +18,7 @@ namespace Profound.Data
             _connectionString = configuration["ConnectionStrings:AzureConnection"];
         }
 
-  
+
         public IEnumerable<User> GetUsers()
         {
             using (var connection = new MySqlConnection(_connectionString))
@@ -37,7 +37,7 @@ namespace Profound.Data
                 connection.Open();
                 return connection.QueryFirstOrDefault<User>(
                     @"SELECT id, role_id AS roleId, email, first_name AS firstName, last_name AS lastName FROM User 
-                    WHERE id=@UserId;", new { UserId = userId}
+                    WHERE id=@UserId;", new { UserId = userId }
                 );
             }
         }
@@ -156,7 +156,17 @@ namespace Profound.Data
             }
         }
 
-        
+        public bool GetEnrollment(UserCourseEnrollment userCourseEnrollment)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                var enrollment = connection.QueryFirstOrDefault<Course>(
+                    @"SELECT * FROM User_course_enrollment WHERE user_id=@UserId and course_id=@CourseId",
+                    new { UserId = userCourseEnrollment.UserId, CourseId = userCourseEnrollment.CourseId }
+                    );
+                return false ? enrollment is null : true;
+            }
+        }
         public Category GetCategory(int categoryId)
         {
             using (var connection = new MySqlConnection(_connectionString))
@@ -164,7 +174,7 @@ namespace Profound.Data
                 connection.Open();
                 return connection.QueryFirstOrDefault<Category>(
                     @"SELECT id, name FROM Category WHERE id=@CategoryId;", new { CategoryId = categoryId }
-                );
+                );                
             }
         }
 
@@ -174,7 +184,7 @@ namespace Profound.Data
             {
                 connection.Open();
                 return connection.QueryFirstOrDefault<Comment>(
-                    @"SELECT id, user_id AS userId, component_id AS componentId, text FROM Comment WHERE id=@CommentId;", 
+                    @"SELECT id, user_id AS userId, component_id AS componentId, text FROM Comment WHERE id=@CommentId;",
                     new { CommentId = commentId }
                 );
             }
@@ -186,11 +196,27 @@ namespace Profound.Data
             {
                 connection.Open();
                 connection.Execute(
-                    @"INSERT INTO Comment( user_id, component_id, text) VALUES (@UserId, @ComponentId, @Text);", 
-                    new {comment.UserId, comment.ComponentId, comment.Text}
+                    @"INSERT INTO Comment( user_id, component_id, text) VALUES (@UserId, @ComponentId, @Text);",
+                    new { comment.UserId, comment.ComponentId, comment.Text }
                 );
                 return connection.QueryFirst<Comment>(
                     @"SELECT id, user_id AS userId, component_id AS componentId, text FROM Comment ORDER BY id DESC LIMIT 1;"
+                );
+            }
+        }
+
+        public Course PostEnrollment(UserCourseEnrollment enrollment)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"INSERT INTO User_course_enrollment(user_id, course_id, status) 
+                    VALUES(@UserId, @CourseId, @Status);",
+                    new { enrollment.UserId, enrollment.CourseId, enrollment.Status }
+                );
+                return connection.QueryFirst<Course>(
+                    @"SELECT title From Course where id=@Id", new { Id = enrollment.CourseId }
                 );
             }
         }
