@@ -15,7 +15,7 @@ namespace Profound.Data
 
         public DataRepository(IConfiguration configuration)
         {
-            _connectionString = configuration["ConnectionStrings:MySQLConnection"];
+            _connectionString = configuration["ConnectionStrings:AzureConnection"];
         }
 
   

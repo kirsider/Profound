@@ -70,7 +70,7 @@ namespace Profound.Controllers
             }
             return category;
         }
-        
+
         [HttpPost("comment")]
         public ActionResult<Comment> PostComment(CommentPostRequest commentPostRequest)
         {
