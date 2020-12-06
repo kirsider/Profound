@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Profound.Data;
+using Stripe;
 
 namespace Profound
 {
@@ -28,11 +29,13 @@ namespace Profound
         {
             services.AddControllers();
             services.AddScoped<IDataRepository, DataRepository>();
+            services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            StripeConfiguration.ApiKey = Configuration["Stripe:SecretKey"];
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

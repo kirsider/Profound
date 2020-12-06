@@ -37,9 +37,28 @@ namespace Profound.Controllers
             return course;
         }
 
+        [HttpGet("{courseId}/modules")]
+        public IEnumerable<Module> GetModules(int courseId)
+        {
+            return _dataRepository.GetCourseModules(courseId);
+        }
+
+        [HttpGet("{courseId}/modules/{moduleId}")]
+        public IEnumerable<Lesson> GetLessons(int moduleId)
+        {
+            return _dataRepository.GetModuleLessons(moduleId);
+        }
+
+        [HttpGet("{courseId}/modules/{moduleId}/{lessonId}")]
+        public IEnumerable<Component> GetComponents(int lessonId)
+        {
+            return _dataRepository.GetLessonComponents(lessonId);
+        }
+
+
         [HttpPost("enrollment")]
         public ActionResult<Course> PostEnrollment(UserCourseEnrollment userCourseEnrollment)
-        {            
+        {
             var course = _dataRepository.PostEnrollment(userCourseEnrollment);
             return CreatedAtAction("PostEnrollment", course);
         }

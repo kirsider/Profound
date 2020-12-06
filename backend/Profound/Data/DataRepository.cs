@@ -15,7 +15,7 @@ namespace Profound.Data
 
         public DataRepository(IConfiguration configuration)
         {
-            _connectionString = configuration["ConnectionStrings:MySQLConnection"];
+            _connectionString = configuration["ConnectionStrings:AzureConnection"];
         }
 
 
@@ -156,15 +156,16 @@ namespace Profound.Data
             }
         }
 
-        public bool GetEnrollment(UserCourseEnrollment userCourseEnrollment)
+        public bool GetEnrollment(int userId, int courseId)
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
-                var enrollment = connection.QueryFirstOrDefault<Course>(
+                var enrollment = connection.QueryFirstOrDefault<UserCourseEnrollment>(
                     @"SELECT * FROM User_course_enrollment WHERE user_id=@UserId and course_id=@CourseId",
-                    new { UserId = userCourseEnrollment.UserId, CourseId = userCourseEnrollment.CourseId }
+                    new { UserId = userId, CourseId = courseId }
                     );
-                return false ? enrollment is null : true;
+
+                return enrollment == null ? false : true;
             }
         }
         public Category GetCategory(int categoryId)
@@ -174,7 +175,7 @@ namespace Profound.Data
                 connection.Open();
                 return connection.QueryFirstOrDefault<Category>(
                     @"SELECT id, name FROM Category WHERE id=@CategoryId;", new { CategoryId = categoryId }
-                );                
+                );
             }
         }
 
@@ -202,6 +203,91 @@ namespace Profound.Data
                 return connection.QueryFirst<Comment>(
                     @"SELECT id, user_id AS userId, component_id AS componentId, text FROM Comment ORDER BY id DESC LIMIT 1;"
                 );
+            }
+        }
+
+        public Course CreateCourse(Course course)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"INSERT INTO Course(id, creator_id, title, description, price, acceptance_percantage, requirements,
+                    status, published_at) 
+                    VALUES(@CreatorId, @Title, @Description, @Price, @AcceptancePersantage, @Requirements, 
+                    @Status, @PublishedAt);",
+                    new
+                    {
+                        course.Id,
+                        course.CreatorId,
+                        course.Title,
+                        course.Description,
+                        course.Price,
+                        course.AcceptancePercantage,
+                        course.Requirements,
+                        course.Status,
+                        DateTime.Now
+                    }
+                );
+                return GetCourse(course.Id);
+            }
+        }
+
+        public Module CreateModule(Module module)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"INSERT INTO Module(id, course_id, name) 
+                    VALUES(@id, @courseId, @name);",
+                    new
+                    {
+                        module.Id,
+                        module.CourseId,
+                        module.Name
+                    }
+                );
+                return GetCourseModules(module.CourseId).Where(m => m.Id == module.Id).FirstOrDefault();
+            }
+        }
+
+        public Lesson CreateLesson(Lesson lesson)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"INSERT INTO Lesson(id, module_id, name) 
+                    VALUES(@id, @moduleId, @name);",
+                    new
+                    {
+                        lesson.Id,
+                        lesson.ModuleId,
+                        lesson.Name
+                    }
+                );
+                return GetModuleLessons(lesson.ModuleId).Where(l => l.Id == lesson.Id).FirstOrDefault();
+            }
+        }
+
+        public Component CreateComponent(Component component)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"INSERT INTO Lesson(id, lesson_id, max_points, content) 
+                    VALUES(@id, @lessonId, @maxPoints, @content);",
+                    new
+                    {
+                        component.Id,
+                        component.LessonId,
+                        component.MaxPoints,
+                        component.Content
+                    }
+                );
+                return GetLessonComponents(component.LessonId).Where(c => c.Id == component.Id).FirstOrDefault();
             }
         }
 
