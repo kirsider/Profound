@@ -31,5 +31,5 @@ jobs:
       with:
         app-name: 'profound-web-app'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_177259e1e5c84b3cbf26ad7255996d6d }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_bf04df0aaacf4a2988351a102098cbf8 }}
         package: ${{env.DOTNET_ROOT}}/myapp 
