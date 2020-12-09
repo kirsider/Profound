@@ -73,9 +73,10 @@ namespace Profound.Controllers
             return _dataRepository.CreateComponent(component);
         }
 
-        public void RequestToPublic(int courseId)
+        [HttpPost("requestToModeration")]
+        public void RequestToPublic(int course_id)
         {
-            //запрос на публикацию
+            _dataRepository.RequestToModeration(course_id);
         }
 
         public IEnumerable<string> GetCourses()

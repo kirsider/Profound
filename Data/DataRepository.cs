@@ -191,6 +191,19 @@ namespace Profound.Data
             }
         }
 
+        public void RequestToModeration(int course_id)
+        {
+            string status = "on_moderation";
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"UPDATE Course SET status=@Status WHERE id=@CourseId;",
+                    new { Status = status, CourseId = course_id}
+                );                
+            }
+        }
+
         public Comment PostComment(Comment comment)
         {
             using (var connection = new MySqlConnection(_connectionString))
@@ -208,24 +221,24 @@ namespace Profound.Data
 
         public Course CreateCourse(Course course)
         {
+            string status = "dev";
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
                 connection.Execute(
-                    @"INSERT INTO Course(id, creator_id, title, description, price, acceptance_percantage, requirements,
+                    @"INSERT INTO Course(creator_id, title, description, price, acceptance_percantage, requirements,
                     status, published_at) 
                     VALUES(@CreatorId, @Title, @Description, @Price, @AcceptancePersantage, @Requirements, 
                     @Status, @PublishedAt);",
                     new
-                    {
-                        course.Id,
+                    {                        
                         course.CreatorId,
                         course.Title,
                         course.Description,
                         course.Price,
                         course.AcceptancePercantage,
                         course.Requirements,
-                        course.Status,
+                        status,
                         DateTime.Now
                     }
                 );
@@ -239,11 +252,10 @@ namespace Profound.Data
             {
                 connection.Open();
                 connection.Execute(
-                    @"INSERT INTO Module(id, course_id, name) 
-                    VALUES(@id, @courseId, @name);",
+                    @"INSERT INTO Module(course_id, name) 
+                    VALUES(@courseId, @name);",
                     new
-                    {
-                        module.Id,
+                    {                        
                         module.CourseId,
                         module.Name
                     }
@@ -258,11 +270,10 @@ namespace Profound.Data
             {
                 connection.Open();
                 connection.Execute(
-                    @"INSERT INTO Lesson(id, module_id, name) 
-                    VALUES(@id, @moduleId, @name);",
+                    @"INSERT INTO Lesson(module_id, name) 
+                    VALUES(@moduleId, @name);",
                     new
-                    {
-                        lesson.Id,
+                    {                        
                         lesson.ModuleId,
                         lesson.Name
                     }
@@ -277,11 +288,10 @@ namespace Profound.Data
             {
                 connection.Open();
                 connection.Execute(
-                    @"INSERT INTO Lesson(id, lesson_id, max_points, content) 
-                    VALUES(@id, @lessonId, @maxPoints, @content);",
+                    @"INSERT INTO Lesson(lesson_id, max_points, content) 
+                    VALUES(@lessonId, @maxPoints, @content);",
                     new
-                    {
-                        component.Id,
+                    {                        
                         component.LessonId,
                         component.MaxPoints,
                         component.Content
