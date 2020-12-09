@@ -37,6 +37,8 @@ namespace Profound.Data
 
         Component CreateComponent(Component component);
 
+        void RequestToModeration(int course_id);
+
         public Course PostEnrollment(UserCourseEnrollment enrollment);
 
         // PUT Methods
