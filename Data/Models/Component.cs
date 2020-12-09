@@ -9,6 +9,7 @@ namespace Profound.Data.Models
     {
         public int Id { get; set; }
         public int LessonId { get; set; }
+        public string ComponentType { get; set; }
         public int MaxPoints { get; set; }
         public string Content { get; set; }
 

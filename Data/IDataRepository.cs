@@ -17,11 +17,13 @@ namespace Profound.Data
         IEnumerable<Lesson> GetModuleLessons(int moduleId);
         IEnumerable<Component> GetLessonComponents(int lessonId);
         IEnumerable<Comment> GetComponentComments(int componentId);
-
         User GetUser(int userId);
         Course GetCourse(int courseId);
         Category GetCategory(int categoryId);
         Comment GetComment(int commentId);
+        CourseStats GetCourseStats(int courseId, int offset, int limit);
+        ComponentStats GetComponentStats(int componentId);
+
 
         // POST Methods
 

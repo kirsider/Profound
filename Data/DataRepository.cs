@@ -219,5 +219,50 @@ namespace Profound.Data
                 );
             }
         }
+
+        public CourseStats GetCourseStats(int courseId, int offset, int limit)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+               
+                var courseStatsTotal = connection.Query<UserCoursePoints>(
+                    @"SELECT first_name AS firstName, last_name AS lastName, SUM(us.points) AS totalPoints
+                      FROM (SELECT user_id FROM User_course_enrollment WHERE course_id=@CourseId) AS cu
+				      JOIN User_solution AS us ON cu.user_id = us.user_id
+					  JOIN `User` AS u ON cu.user_id = u.id
+                      GROUP BY us.user_id, first_name, last_name
+                      ORDER BY SUM(us.points) DESC;", new { CourseId = courseId }
+                );
+
+                var statsPage = courseStatsTotal.Skip(offset).Take(limit);
+                return new CourseStats
+                {
+                    UsersCourseStats = statsPage,
+                    Pagination = new Pagination { 
+                        Total = courseStatsTotal.Count(),
+                        Limit = limit, Offset = offset,
+                        Returned = statsPage.Count() 
+                    }
+                };
+               
+            }
+        }
+
+        public ComponentStats GetComponentStats(int componentId)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();  
+                return connection.QueryFirstOrDefault<ComponentStats>(
+                    @"SELECT 
+                    SUM(CASE WHEN `Status` = 'correct' THEN 1 ELSE 0 END) AS answeredCorrectly,
+                    SUM(CASE WHEN `Status` != 'uncompleted' THEN 1 ELSE 0 END) AS participantsTotal 
+                    FROM User_solution AS us
+                    JOIN Component AS c ON us.Component_id = c.id  
+                    WHERE Component_id = @ComponentId AND Component_type = 'practice'; ", new { ComponentId = componentId }
+                );
+            }
+        }
     }
 }
