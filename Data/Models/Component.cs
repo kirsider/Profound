@@ -13,6 +13,8 @@ namespace Profound.Data.Models
         public int MaxPoints { get; set; }
         public string Content { get; set; }
 
+        public int Order { get; set; }
+
         public IEnumerable<Comment> Comments { get; set; }
     }
 }

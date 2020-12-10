@@ -11,6 +11,8 @@ namespace Profound.Data.Models
         public int ModuleId { get; set; }
         public string Name { get; set; }
 
+        public int Order { get; set; }
+
         public IEnumerable<Component> Components { get; set; }
     }
 }

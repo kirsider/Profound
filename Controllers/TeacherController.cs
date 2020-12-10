@@ -20,7 +20,6 @@ namespace Profound.Controllers
             _dataRepository = dataRepository;
         }
 
-        // GET: api/Teacher
         [HttpGet("courses")]
 
         public IEnumerable<Course> GetCourses(int teacherId)
@@ -79,34 +78,10 @@ namespace Profound.Controllers
             _dataRepository.RequestToModeration(course_id);
         }
 
-        public IEnumerable<string> GetCourses()
+        [HttpDelete("courses/{courseId}")]
+        public void DeleteCourse(int id)
         {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET: api/Teacher/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST: api/Teacher
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT: api/Teacher/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            _dataRepository.DeleteСourse(id);
         }
     }
 }
