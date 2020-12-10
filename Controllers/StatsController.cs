@@ -22,15 +22,27 @@ namespace Profound.Controllers
         }
 
         [HttpGet("course/{courseId}")]
-        public CourseStats GetCourseStats(int courseId, int offset=0, int limit=STATS_PAGE_LIMIT)
+        public ActionResult<CourseStats> GetCourseStats(int courseId, int offset=0, int limit=STATS_PAGE_LIMIT)
         {
-            return _dataRepository.GetCourseStats(courseId, offset, limit);
+            var userStats = _dataRepository.GetCourseStats(courseId, offset, limit);
+            if (userStats == null)
+            {
+                return NotFound();
+            }
+
+            return userStats;
         }
 
         [HttpGet("component/{componentId}")]
-        public ComponentStats GetComponentStats(int componentId)
+        public ActionResult<ComponentStats> GetComponentStats(int componentId)
         {
-            return _dataRepository.GetComponentStats(componentId);
+            var componentStats = _dataRepository.GetComponentStats(componentId);
+            if (componentStats == null)
+            {
+                return NotFound();
+            }
+
+            return componentStats;
         }
     }
 }
