@@ -275,5 +275,19 @@ namespace Profound.Data
                 );
             }
         }
+
+        public Payment PostPurchase(Payment payment)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"INSERT INTO Payment(course_id, user_id) VALUES (@CourseId, @UserId);",
+                    new { CourseId = payment.CourseId, UserId = payment.UserId}
+                );
+                return payment;
+            }
+
+        }
     }
 }
