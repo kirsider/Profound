@@ -41,14 +41,14 @@ namespace Profound.Data
 
         void RequestToModeration(int course_id);
 
-        public Course PostEnrollment(UserCourseEnrollment enrollment);
-
-        // PUT Methods
+        public Course PostEnrollment(UserCourseEnrollment enrollment);        
 
         Comment PutComment(int commentId, CommentPutRequest commentPutRequest);
 
-        // DELETE Methods
+        void DeleteСourse(int course_id);
 
         void DeleteComment(int commentId);
+
+        IEnumerable<Comment> GetCommentsFromComponent(int component_id);
     }
 }

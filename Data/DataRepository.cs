@@ -72,8 +72,8 @@ namespace Profound.Data
             {
                 connection.Open();
                 var modules = connection.Query<Module>(
-                    @"SELECT id, course_id AS courseId, name FROM Module
-                      WHERE course_id=@CourseId;", new { CourseId = courseId }
+                    @"SELECT id, course_id AS courseId, name,order FROM Module
+                      WHERE course_id=@CourseId ORDER BY order;", new { CourseId = courseId }
                 );
 
                 foreach (var module in modules)
@@ -91,8 +91,8 @@ namespace Profound.Data
             {
                 connection.Open();
                 var lessons = connection.Query<Lesson>(
-                    @"SELECT id, module_id AS moduleId, name FROM Lesson
-                      WHERE module_id=@ModuleId;", new { ModuleId = moduleId }
+                    @"SELECT id, module_id AS moduleId, name, order FROM Lesson
+                      WHERE module_id=@ModuleId ORDER BY order;", new { ModuleId = moduleId }
                 );
 
                 foreach (var lesson in lessons)
@@ -110,8 +110,8 @@ namespace Profound.Data
             {
                 connection.Open();
                 var components = connection.Query<Component>(
-                    @"SELECT id, lesson_id AS lessonId, max_points AS maxPoints, content FROM Component
-                      WHERE lesson_id=@LessonId;", new { LessonId = lessonId }
+                    @"SELECT id, lesson_id AS lessonId, max_points AS maxPoints, content, order FROM Component
+                      WHERE lesson_id=@LessonId ORDER BY order;", new { LessonId = lessonId }
                 );
 
                 foreach (var component in components)
@@ -129,8 +129,8 @@ namespace Profound.Data
             {
                 connection.Open();
                 return connection.Query<Comment>(
-                    @"SELECT id, user_id AS userId, component_id AS componentId, text FROM Comment
-                      WHERE component_id=@ComponentId;", new { ComponentId = componentId }
+                    @"SELECT id, user_id AS userId, component_id AS componentId, text, created_at AS createdAt
+                    FROM Comment WHERE component_id=@ComponentId;", new { ComponentId = componentId }
                 );
             }
         }
@@ -191,17 +191,37 @@ namespace Profound.Data
             }
         }
 
-        public void RequestToModeration(int course_id)
+        public IEnumerable<Comment> GetCommentsFromComponent(int component_id)
         {
-            string status = "on_moderation";
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                return connection.Query<Comment>("SELECT id, user_id AS userId, component_id as componentId, " +
+                    "text, created_at as createdAt WHERE component_id = @ComponentId ORDER BY created_at",
+                    new { ComponentId = component_id });
+            }
+        }
+
+        public void ChangeCourseStatus(string status, int course_id)
+        {
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
                 connection.Execute(
                     @"UPDATE Course SET status=@Status WHERE id=@CourseId;",
-                    new { Status = status, CourseId = course_id}
-                );                
+                    new { Status = status, CourseId = course_id }
+                );
             }
+        }
+
+        public void RequestToModeration(int course_id)
+        {
+            ChangeCourseStatus("on_moderation", course_id);
+        }
+
+        public void ConfirmCourse(int course_id)
+        {
+            ChangeCourseStatus("published", course_id);
         }
 
         public Comment PostComment(Comment comment)
@@ -231,7 +251,7 @@ namespace Profound.Data
                     VALUES(@CreatorId, @Title, @Description, @Price, @AcceptancePersantage, @Requirements, 
                     @Status, @PublishedAt);",
                     new
-                    {                        
+                    {
                         course.CreatorId,
                         course.Title,
                         course.Description,
@@ -255,7 +275,7 @@ namespace Profound.Data
                     @"INSERT INTO Module(course_id, name) 
                     VALUES(@courseId, @name);",
                     new
-                    {                        
+                    {
                         module.CourseId,
                         module.Name
                     }
@@ -273,7 +293,7 @@ namespace Profound.Data
                     @"INSERT INTO Lesson(module_id, name) 
                     VALUES(@moduleId, @name);",
                     new
-                    {                        
+                    {
                         lesson.ModuleId,
                         lesson.Name
                     }
@@ -291,7 +311,7 @@ namespace Profound.Data
                     @"INSERT INTO Lesson(lesson_id, max_points, content) 
                     VALUES(@lessonId, @maxPoints, @content);",
                     new
-                    {                        
+                    {
                         component.LessonId,
                         component.MaxPoints,
                         component.Content
@@ -311,9 +331,7 @@ namespace Profound.Data
                     VALUES(@UserId, @CourseId, @Status);",
                     new { enrollment.UserId, enrollment.CourseId, enrollment.Status }
                 );
-                return connection.QueryFirst<Course>(
-                    @"SELECT title From Course where id=@Id", new { Id = enrollment.CourseId }
-                );
+                return GetCourse(enrollment.CourseId);
             }
         }
 
@@ -327,6 +345,18 @@ namespace Profound.Data
                     new { commentPutRequest.Text, Id = commentId }
                 );
                 return GetComment(commentId);
+            }
+        }
+
+        public void DeleteСourse(int course_id)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"DELETE FROM course WHERE id = @Id;",
+                    new { Id = course_id }
+                );
             }
         }
 
@@ -366,13 +396,15 @@ namespace Profound.Data
                 return new CourseStats
                 {
                     UsersCourseStats = statsPage,
-                    Pagination = new Pagination { 
+                    Pagination = new Pagination
+                    {
                         Total = courseStatsTotal.Count(),
-                        Limit = limit, Offset = offset,
-                        Returned = statsPage.Count() 
+                        Limit = limit,
+                        Offset = offset,
+                        Returned = statsPage.Count()
                     }
                 };
-               
+
             }
         }
 

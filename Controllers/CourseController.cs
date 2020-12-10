@@ -55,37 +55,17 @@ namespace Profound.Controllers
             return _dataRepository.GetLessonComponents(lessonId);
         }
 
+        public IEnumerable<Comment> GetComments(int component_id)
+        {
+            return _dataRepository.GetCommentsFromComponent(component_id);
+        }
+
 
         [HttpPost("enrollment")]
         public ActionResult<Course> PostEnrollment(UserCourseEnrollment userCourseEnrollment)
         {
             var course = _dataRepository.PostEnrollment(userCourseEnrollment);
             return CreatedAtAction("PostEnrollment", course);
-        }
-
-        // GET: api/Course/5
-        /*[HttpGet("{id}", Name = "Get")]
-        public IEnumerable<Course> Get(int id)
-        {
-            return _dataRepository.GetCourses();
-        }*/
-
-        // POST: api/Course
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT: api/Course/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
         }
     }
 }
