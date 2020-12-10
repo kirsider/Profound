@@ -225,7 +225,12 @@ namespace Profound.Data
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
-               
+                var id = connection.QueryFirstOrDefault<int>(
+                   @"SELECT id FROM Course WHERE id=@CourseId;", new { CourseId = courseId }
+                 );
+
+                if (id == 0) return null;
+
                 var courseStatsTotal = connection.Query<UserCoursePoints>(
                     @"SELECT first_name AS firstName, last_name AS lastName, SUM(us.points) AS totalPoints
                       FROM (SELECT user_id FROM User_course_enrollment WHERE course_id=@CourseId) AS cu
@@ -253,7 +258,13 @@ namespace Profound.Data
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
-                connection.Open();  
+                connection.Open();
+                var id = connection.QueryFirstOrDefault<int>(
+                    @"SELECT id FROM Component WHERE id=@ComponentId;", new { ComponentId = componentId }
+                );
+
+                if (id == 0) return null;
+
                 return connection.QueryFirstOrDefault<ComponentStats>(
                     @"SELECT 
                     SUM(CASE WHEN `Status` = 'correct' THEN 1 ELSE 0 END) AS answeredCorrectly,
