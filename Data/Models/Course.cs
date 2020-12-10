@@ -14,6 +14,9 @@ namespace Profound.Data.Models
         public double Price { get; set; }
         public double AcceptancePercantage { get; set; }
         public string Status { get; set; }
+
+        public string Requirements { get; set; }
+
         public DateTime PublishedAt { get; set; }
 
         public IEnumerable<Module> Modules { get; set; }
