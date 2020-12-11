@@ -9,18 +9,20 @@ namespace Profound.Data
     public interface IDataRepository
     {
         // GET Methods
-
         IEnumerable<Role> GetRoles();
         IEnumerable<User> GetUsers();
         IEnumerable<Course> GetCourses();
+
         IEnumerable<Module> GetCourseModules(int courseId);
         IEnumerable<Lesson> GetModuleLessons(int moduleId);
         IEnumerable<Component> GetLessonComponents(int lessonId);
         IEnumerable<Comment> GetComponentComments(int componentId);
 
-        bool GetEnrollment(int userId, int courseId);
+        bool IsEnrolled(int userId, int courseId);
         User GetUser(int userId);
         Course GetCourse(int courseId);
+        Course GetBaseCourse(int courseId);
+
         Category GetCategory(int categoryId);
         Comment GetComment(int commentId);
         CourseStats GetCourseStats(int courseId, int offset, int limit);
@@ -28,7 +30,6 @@ namespace Profound.Data
 
 
         // POST Methods
-
         Comment PostComment(Comment comment);
 
         Course CreateCourse(Course course);
@@ -39,12 +40,15 @@ namespace Profound.Data
 
         Component CreateComponent(Component component);
 
-        void RequestToModeration(int course_id);
+        void RequestToPublish(int course_id);
+        void PublishCourse(int course_id);
 
-        public Course PostEnrollment(UserCourseEnrollment enrollment);        
+        void PostEnrollment(UserCourseEnrollment enrollment);
+        void PostPurchase(Payment payment);
 
         Comment PutComment(int commentId, CommentPutRequest commentPutRequest);
 
+        // DELETE Methods
         void DeleteСourse(int course_id);
 
         void DeleteComment(int commentId);

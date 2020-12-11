@@ -71,47 +71,5 @@ namespace Profound.Controllers
             return category;
         }
 
-        [HttpPost("comment")]
-        public ActionResult<Comment> PostComment(CommentPostRequest commentPostRequest)
-        {
-            var savedComment = _dataRepository.PostComment(new Comment
-            {
-                ComponentId = commentPostRequest.ComponentId,
-                UserId = 1,
-                Text = commentPostRequest.Text
-            });
-
-            return CreatedAtAction("PostComment", savedComment);
-        }
-
-        [HttpPut("comment/{commentId}")]
-        public ActionResult<Comment> PutComment(int commentId, CommentPutRequest commentPutRequest)
-        {
-            var comment = _dataRepository.GetComment(commentId);
-          
-            if (comment == null)
-            {
-                return NotFound();
-            }
-
-            commentPutRequest.Text = string.IsNullOrEmpty(commentPutRequest.Text) ? comment.Text : commentPutRequest.Text;
-
-            var savedComment = _dataRepository.PutComment(commentId, commentPutRequest);
-            return savedComment;
-        }
-
-        [HttpDelete("comment/{commentId}")]
-        public ActionResult DeleteComment(int commentId)
-        {
-            var comment = _dataRepository.GetComment(commentId);
-
-            if (comment == null)
-            {
-                return NotFound();
-            }
-
-            _dataRepository.DeleteComment(commentId);
-            return NoContent();
-        }
     }
 }

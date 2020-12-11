@@ -21,67 +21,46 @@ namespace Profound.Controllers
         }
 
         [HttpGet("courses")]
-
-        public IEnumerable<Course> GetCourses(int teacherId)
+        public IEnumerable<Course> GetCourses()
         {
+            int teacherId = 1;  // dummy id
             return _dataRepository.GetCourses().Where(c => c.CreatorId == teacherId);
         }
 
         [HttpGet("courses/{courseId}")]
-        public IEnumerable<Module> GetModules(int courseId)
+        public ActionResult<Course> GetCourse(int courseId)
         {
-            return _dataRepository.GetCourseModules(courseId);
+            Course course =  _dataRepository.GetCourse(courseId);
+
+            if (course == null)
+            {
+                return NotFound();
+            }
+            return course;
         }
 
-        [HttpGet("courses/{courseId}/{moduleId}")]
-        public IEnumerable<Lesson> GetLessons(int moduleId)
-        {
-            return _dataRepository.GetModuleLessons(moduleId);
-        }
-
-        [HttpGet("courses/{courseId}/{moduleId}/{lessonId}")]
-        public IEnumerable<Component> GetComponent(int lessonId)
-        {
-            return _dataRepository.GetLessonComponents(lessonId);
-        }
-
-        [HttpPost("createCourse")]
+        [HttpPost("courses/create")]
         public Course CreateCourse(Course course)
         {
             return _dataRepository.CreateCourse(course);
-        }
-
-        [HttpPost("courses/{courseId}/createModule")]
-        public Module CreateModule(int courseId, Module module)
-        {
-            module.CourseId = courseId;
-            return _dataRepository.CreateModule(module);
-        }
-
-        [HttpPost("courses/{courseId}/{moduleId}/createLesson")]
-        public Lesson CreateLesson(int moduleId, Lesson lesson)
-        {
-            lesson.ModuleId = moduleId;
-            return _dataRepository.CreateLesson(lesson);
-        }
-
-        [HttpPost("courses/{courseId}/{moduleId}/{lessonId}/createComponent")]
-        public Component CreateComponent(int lessonId, Component component)
-        {
-            component.LessonId = lessonId;
-            return _dataRepository.CreateComponent(component);
-        }
-
-        [HttpPost("requestToModeration")]
-        public void RequestToPublic(int course_id)
-        {
-            _dataRepository.RequestToModeration(course_id);
         }
 
         [HttpDelete("courses/{courseId}")]
         public void DeleteCourse(int id)
         {
             _dataRepository.DeleteСourse(id);
+        }
+
+        [HttpPost("courses/{course_id}/requestToPublish")]
+        public void RequestToPublish(int course_id)
+        {
+            _dataRepository.RequestToPublish(course_id);
+        }
+
+        [HttpPost("courses/{course_id}/publish")]
+        public void PublishCourse(int course_id)
+        {
+            _dataRepository.PublishCourse(course_id);
         }
     }
 }

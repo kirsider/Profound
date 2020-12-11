@@ -29,7 +29,12 @@ namespace Profound.Controllers
         [HttpGet("{courseId}")]
         public ActionResult<Course> GetCourse(int courseId)
         {
-            var course = _dataRepository.GetCourse(courseId);
+            int userId = 5;
+
+            // return basic course details for overview mode, extended course data - for course passing
+            Course course = _dataRepository.IsEnrolled(userId, courseId) ?
+                _dataRepository.GetCourse(courseId) : _dataRepository.GetBaseCourse(courseId);
+
             if (course == null)
             {
                 return NotFound();
@@ -55,17 +60,81 @@ namespace Profound.Controllers
             return _dataRepository.GetLessonComponents(lessonId);
         }
 
+        [HttpGet("component/{component_id}/comment")]
         public IEnumerable<Comment> GetComments(int component_id)
         {
             return _dataRepository.GetCommentsFromComponent(component_id);
         }
 
-
-        [HttpPost("enrollment")]
-        public ActionResult<Course> PostEnrollment(UserCourseEnrollment userCourseEnrollment)
+        [HttpPost("comment")]
+        public ActionResult<Comment> PostComment(CommentPostRequest commentPostRequest)
         {
-            var course = _dataRepository.PostEnrollment(userCourseEnrollment);
-            return CreatedAtAction("PostEnrollment", course);
+            var savedComment = _dataRepository.PostComment(new Comment
+            {
+                ComponentId = commentPostRequest.ComponentId,
+                UserId = 1,
+                Text = commentPostRequest.Text,
+                CreatedAt = DateTime.Now
+            });
+
+            return CreatedAtAction("PostComment", savedComment);
+        }
+
+        [HttpPut("comment/{commentId}")]
+        public ActionResult<Comment> PutComment(int commentId, CommentPutRequest commentPutRequest)
+        {
+            var comment = _dataRepository.GetComment(commentId);
+
+            if (comment == null)
+            {
+                return NotFound();
+            }
+
+            commentPutRequest.Text = string.IsNullOrEmpty(commentPutRequest.Text) ? comment.Text : commentPutRequest.Text;
+
+            var savedComment = _dataRepository.PutComment(commentId, commentPutRequest);
+            return savedComment;
+        }
+
+        [HttpDelete("comment/{commentId}")]
+        public ActionResult DeleteComment(int commentId)
+        {
+            var comment = _dataRepository.GetComment(commentId);
+
+            if (comment == null)
+            {
+                return NotFound();
+            }
+
+            _dataRepository.DeleteComment(commentId);
+            return NoContent();
+        }
+
+        [HttpPost("{courseId}/enroll")]
+        public IActionResult PostEnrollment(int courseId)
+        {
+            int userId = 5;  // just dummy id till jwt introduced
+            _dataRepository.PostEnrollment(new UserCourseEnrollment
+            {
+                CourseId = courseId,
+                UserId = userId
+            });
+
+            return Ok();
+        }
+            
+        [HttpPost("{courseId}/purchase")]
+        public IActionResult Purchase(int courseId)
+        {
+            int userId = 5;
+            _dataRepository.PostPurchase(new Payment { CourseId = courseId, UserId = userId });
+            _dataRepository.PostEnrollment(new UserCourseEnrollment
+            {
+                CourseId = courseId,
+                UserId = userId
+            });
+
+            return Ok();
         }
     }
 }
