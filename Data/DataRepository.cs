@@ -244,12 +244,25 @@ namespace Profound.Data
                 connection.Open();
                 connection.Execute(
                     @"INSERT INTO Comment( user_id, component_id, `text`, created_at) 
-                      VALUES (@UserId, @ComponentId, @Text, @CreatedAt);", 
-                    new {comment.UserId, comment.ComponentId, comment.Text, comment.CreatedAt}
+                      VALUES (@UserId, @ComponentId, @Text, @CreatedAt);",
+                    new { comment.UserId, comment.ComponentId, comment.Text, comment.CreatedAt }
                 );
                 return connection.QueryFirst<Comment>(
                     @"SELECT id, user_id AS userId, component_id AS componentId, `text`, created_at AS createdAt 
                       FROM Comment ORDER BY id DESC LIMIT 1;"
+                );
+            }
+        }
+
+        public void InsertToCategoryCourse(int courseId, int categoryId)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"INSERT INTO category_course(course_id, category_id) 
+                      VALUES (@CourseId, @CategoryId);",
+                    new { CourseId =courseId, CategotyId = categoryId }
                 );
             }
         }
@@ -279,12 +292,12 @@ namespace Profound.Data
                     }
                 ));
                 course.Id = courseId;
-                foreach(var module in course.Modules)
+                foreach (var module in course.Modules)
                 {
                     module.CourseId = courseId;
                     var createdModule = CreateModule(module);
                     module.Id = createdModule.Id;
-                    foreach(var lesson in module.Lessons)
+                    foreach (var lesson in module.Lessons)
                     {
                         lesson.ModuleId = module.Id;
                         var createdLesson = CreateLesson(lesson);
@@ -298,7 +311,7 @@ namespace Profound.Data
                     }
                 }
 
-                
+
                 return course;
             }
         }
@@ -337,7 +350,7 @@ namespace Profound.Data
                     new
                     {
                         ModuleId = lesson.ModuleId,
-                        Name = lesson.Name, 
+                        Name = lesson.Name,
                         Order = lesson.Order
                     }
                 ));
@@ -486,7 +499,7 @@ namespace Profound.Data
                 connection.Open();
                 connection.Execute(
                     @"INSERT INTO Payment(course_id, user_id) VALUES (@CourseId, @UserId);",
-                    new { CourseId = payment.CourseId, UserId = payment.UserId}
+                    new { CourseId = payment.CourseId, UserId = payment.UserId }
                 );
             }
         }

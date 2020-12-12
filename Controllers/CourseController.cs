@@ -49,15 +49,24 @@ namespace Profound.Controllers
         }
 
         [HttpGet("{courseId}/modules/{moduleId}")]
-        public IEnumerable<Lesson> GetLessons(int moduleId)
+        public IEnumerable<Lesson> GetLessons(int courseId, int moduleId)
         {
-            return _dataRepository.GetModuleLessons(moduleId);
+            int userId = 5;
+            Course course = _dataRepository.IsEnrolled(userId, courseId) ?
+                _dataRepository.GetCourse(courseId) : null;
+            Module module = course != null ? course.Modules.Where(m => m.Id == moduleId).FirstOrDefault() : null;
+            return module != null ? _dataRepository.GetModuleLessons(module.Id) : null;
         }
 
         [HttpGet("{courseId}/modules/{moduleId}/{lessonId}")]
-        public IEnumerable<Component> GetComponents(int lessonId)
+        public IEnumerable<Component> GetComponents(int courseId, int moduleId, int lessonId)
         {
-            return _dataRepository.GetLessonComponents(lessonId);
+            int userId = 5;
+            Course course = _dataRepository.IsEnrolled(userId, courseId) ?
+                _dataRepository.GetCourse(courseId) : null;
+            Module module = course != null ? course.Modules.Where(m => m.Id == moduleId).FirstOrDefault() : null;
+            Lesson lesson = module != null ? module.Lessons.Where(l => l.Id == lessonId).FirstOrDefault() : null;
+            return _dataRepository.GetLessonComponents(lesson.Id);
         }
 
         [HttpGet("component/{component_id}/comment")]
@@ -122,7 +131,7 @@ namespace Profound.Controllers
 
             return Ok();
         }
-            
+
         [HttpPost("{courseId}/purchase")]
         public IActionResult Purchase(int courseId)
         {

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Profound.Data;
 using Profound.Data.Models;
+using Profound.Data.ViewModels;
 
 namespace Profound.Controllers
 {
@@ -30,7 +31,7 @@ namespace Profound.Controllers
         [HttpGet("courses/{courseId}")]
         public ActionResult<Course> GetCourse(int courseId)
         {
-            Course course =  _dataRepository.GetCourse(courseId);
+            Course course = _dataRepository.GetCourse(courseId);
 
             if (course == null)
             {
@@ -40,15 +41,28 @@ namespace Profound.Controllers
         }
 
         [HttpPost("courses/create")]
-        public Course CreateCourse(Course course)
+        public ActionResult<Course> CreateCourse(CourseViewModel courseViewModel)
         {
-            return _dataRepository.CreateCourse(course);
+            var course = _dataRepository.CreateCourse(courseViewModel.course);
+            foreach (var category in courseViewModel.CourseCategories)
+            {
+                if (_dataRepository.GetCategory(category.Id) != null)
+                    _dataRepository.InsertToCategoryCourse(course.Id, category.Id);
+            }
+            return CreatedAtAction("CreateCourse", course);
         }
 
         [HttpDelete("courses/{courseId}")]
-        public void DeleteCourse(int id)
+        public ActionResult DeleteCourse(int id)
         {
+            var course = _dataRepository.GetCourse(id);
+
+            if (course == null)
+            {
+                return NotFound();
+            }
             _dataRepository.DeleteСourse(id);
+            return NoContent();
         }
 
         [HttpPost("courses/{course_id}/requestToPublish")]
