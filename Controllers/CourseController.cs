@@ -45,7 +45,10 @@ namespace Profound.Controllers
         [HttpGet("{courseId}/modules")]
         public IEnumerable<Module> GetModules(int courseId)
         {
-            return _dataRepository.GetCourseModules(courseId);
+            int userId = 5;
+            Course course = _dataRepository.IsEnrolled(userId, courseId) ?
+                _dataRepository.GetCourse(courseId) : null;
+            return course != null ? _dataRepository.GetCourseModules(courseId) : null;
         }
 
         [HttpGet("{courseId}/modules/{moduleId}")]
@@ -69,10 +72,16 @@ namespace Profound.Controllers
             return _dataRepository.GetLessonComponents(lesson.Id);
         }
 
-        [HttpGet("component/{component_id}/comment")]
-        public IEnumerable<Comment> GetComments(int component_id)
+        [HttpGet("{courseId}/modules/{moduleId}/{lessonId}/component/{component_id}/comment")]
+        public IEnumerable<Comment> GetComments(int courseId, int moduleId, int lessonId, int component_id)
         {
-            return _dataRepository.GetCommentsFromComponent(component_id);
+            int userId = 5;
+            Course course = _dataRepository.IsEnrolled(userId, courseId) ?
+                _dataRepository.GetCourse(courseId) : null;
+            Module module = course != null ? course.Modules.Where(m => m.Id == moduleId).FirstOrDefault() : null;
+            Lesson lesson = module != null ? module.Lessons.Where(l => l.Id == lessonId).FirstOrDefault() : null;
+            Component component = lesson != null ? lesson.Components.Where(c => c.Id == component_id).FirstOrDefault() : null; ; ;
+            return _dataRepository.GetCommentsFromComponent(component.Id);
         }
 
         [HttpPost("comment")]

@@ -47,7 +47,7 @@ namespace Profound.Controllers
             foreach (var category in courseViewModel.CourseCategories)
             {
                 if (_dataRepository.GetCategory(category.Id) != null)
-                    _dataRepository.InsertToCategoryCourse(course.Id, category.Id);
+                    _dataRepository.CreateRecordingForCategoryCourse(course.Id, category.Id);
             }
             return CreatedAtAction("CreateCourse", course);
         }
@@ -68,13 +68,19 @@ namespace Profound.Controllers
         [HttpPost("courses/{course_id}/requestToPublish")]
         public void RequestToPublish(int course_id)
         {
-            _dataRepository.RequestToPublish(course_id);
+            if (_dataRepository.GetBaseCourse(course_id) != null)
+            {
+                _dataRepository.RequestToPublish(course_id);
+            }
         }
 
         [HttpPost("courses/{course_id}/publish")]
         public void PublishCourse(int course_id)
         {
-            _dataRepository.PublishCourse(course_id);
+            if (_dataRepository.GetBaseCourse(course_id) != null)
+            {
+                _dataRepository.PublishCourse(course_id);
+            }
         }
     }
 }

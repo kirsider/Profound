@@ -46,7 +46,7 @@ namespace Profound.Data
         void PostEnrollment(UserCourseEnrollment enrollment);
         void PostPurchase(Payment payment);
 
-        void InsertToCategoryCourse(int courseId, int categoryId);
+        void CreateRecordingForCategoryCourse(int courseId, int categoryId);
 
         Comment PutComment(int commentId, CommentPutRequest commentPutRequest);
 

@@ -254,7 +254,7 @@ namespace Profound.Data
             }
         }
 
-        public void InsertToCategoryCourse(int courseId, int categoryId)
+        public void CreateRecordingForCategoryCourse(int courseId, int categoryId)
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
@@ -262,7 +262,7 @@ namespace Profound.Data
                 connection.Execute(
                     @"INSERT INTO category_course(course_id, category_id) 
                       VALUES (@CourseId, @CategoryId);",
-                    new { CourseId =courseId, CategotyId = categoryId }
+                    new { CourseId = courseId, CategoryId = categoryId }
                 );
             }
         }
