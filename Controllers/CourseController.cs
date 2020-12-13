@@ -80,7 +80,7 @@ namespace Profound.Controllers
                 _dataRepository.GetCourse(courseId) : null;
             Module module = course != null ? course.Modules.Where(m => m.Id == moduleId).FirstOrDefault() : null;
             Lesson lesson = module != null ? module.Lessons.Where(l => l.Id == lessonId).FirstOrDefault() : null;
-            Component component = lesson != null ? lesson.Components.Where(c => c.Id == component_id).FirstOrDefault() : null; ; ;
+            Component component = lesson != null ? lesson.Components.Where(c => c.Id == component_id).FirstOrDefault() : null;
             return _dataRepository.GetCommentsFromComponent(component.Id);
         }
 

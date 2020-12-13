@@ -72,6 +72,10 @@ namespace Profound.Controllers
             {
                 _dataRepository.RequestToPublish(course_id);
             }
+            else
+            {
+                NotFound();
+            }
         }
 
         [HttpPost("courses/{course_id}/publish")]
@@ -80,6 +84,10 @@ namespace Profound.Controllers
             if (_dataRepository.GetBaseCourse(course_id) != null)
             {
                 _dataRepository.PublishCourse(course_id);
+            }
+            else
+            {
+                NotFound();
             }
         }
     }
