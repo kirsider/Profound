@@ -232,7 +232,7 @@ namespace Profound.Data
             ChangeCourseStatus("on_moderation", course_id);
             if (GetCourse(course_id) != null)
             {
-                return GetBaseCourse(course_id);
+                return GetCourse(course_id);
             }
             else
             {
@@ -245,7 +245,7 @@ namespace Profound.Data
             ChangeCourseStatus("published", course_id);
             if (GetCourse(course_id) != null)
             {
-                return GetBaseCourse(course_id);
+                return GetCourse(course_id);
             }
             else
             {

@@ -66,12 +66,12 @@ namespace Profound.Controllers
         }
 
         [HttpPost("courses/{course_id}/requestToPublish")]
-        public ActionResult<Course> RequestToPublish(int course_id)
+        public ActionResult RequestToPublish(int course_id)
         {
             var course = _dataRepository.RequestToPublish(course_id);
             if (course != null)
             {
-                return CreatedAtAction("RequestToPublish", course); 
+                return Ok(); 
             }
             else
             {
@@ -80,12 +80,12 @@ namespace Profound.Controllers
         }
 
         [HttpPost("courses/{course_id}/publish")]
-        public ActionResult<Course> PublishCourse(int course_id)
+        public ActionResult PublishCourse(int course_id)
         {
             var course = _dataRepository.PublishCourse(course_id);
             if (course != null)
             {
-                return CreatedAtAction("RequestToPublish", course);
+                return Ok();
             }
             else
             {
