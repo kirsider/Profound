@@ -72,18 +72,6 @@ namespace Profound.Controllers
             return _dataRepository.GetLessonComponents(lesson.Id);
         }
 
-        [HttpGet("{courseId}/modules/{moduleId}/{lessonId}/component/{component_id}/comment")]
-        public IEnumerable<Comment> GetComments(int courseId, int moduleId, int lessonId, int component_id)
-        {
-            int userId = 5;
-            Course course = _dataRepository.IsEnrolled(userId, courseId) ?
-                _dataRepository.GetCourse(courseId) : null;
-            Module module = course != null ? course.Modules.Where(m => m.Id == moduleId).FirstOrDefault() : null;
-            Lesson lesson = module != null ? module.Lessons.Where(l => l.Id == lessonId).FirstOrDefault() : null;
-            Component component = lesson != null ? lesson.Components.Where(c => c.Id == component_id).FirstOrDefault() : null;
-            return _dataRepository.GetCommentsFromComponent(component.Id);
-        }
-
         [HttpPost("comment")]
         public ActionResult<Comment> PostComment(CommentPostRequest commentPostRequest)
         {

@@ -227,14 +227,30 @@ namespace Profound.Data
             }
         }
 
-        public void RequestToPublish(int course_id)
+        public Course RequestToPublish(int course_id)
         {
             ChangeCourseStatus("on_moderation", course_id);
+            if (GetCourse(course_id) != null)
+            {
+                return GetBaseCourse(course_id);
+            }
+            else
+            {
+                return null;
+            }
         }
 
-        public void PublishCourse(int course_id)
+        public Course PublishCourse(int course_id)
         {
             ChangeCourseStatus("published", course_id);
+            if (GetCourse(course_id) != null)
+            {
+                return GetBaseCourse(course_id);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public Comment PostComment(Comment comment)
@@ -307,6 +323,7 @@ namespace Profound.Data
                             component.LessonId = lesson.Id;
                             var createdComponent = CreateComponent(component);
                             component.Id = createdComponent.Id;
+                            component.Comments = GetCommentsFromComponent(component.Id);
                         }
                     }
                 }
