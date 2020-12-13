@@ -53,15 +53,15 @@ namespace Profound.Controllers
         }
 
         [HttpDelete("courses/{courseId}")]
-        public ActionResult DeleteCourse(int id)
+        public ActionResult DeleteCourse(int course_id)
         {
-            var course = _dataRepository.GetCourse(id);
+            var course = _dataRepository.GetCourse(course_id);
 
             if (course == null)
             {
                 return NotFound();
             }
-            _dataRepository.DeleteСourse(id);
+            _dataRepository.DeleteСourse(course_id);
             return NoContent();
         }
 

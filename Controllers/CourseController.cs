@@ -42,34 +42,31 @@ namespace Profound.Controllers
             return course;
         }
 
-        [HttpGet("{courseId}/modules")]
-        public IEnumerable<Module> GetModules(int courseId)
-        {
-            int userId = 5;
-            Course course = _dataRepository.IsEnrolled(userId, courseId) ?
-                _dataRepository.GetCourse(courseId) : null;
-            return course != null ? _dataRepository.GetCourseModules(courseId) : null;
-        }
-
         [HttpGet("{courseId}/modules/{moduleId}")]
-        public IEnumerable<Lesson> GetLessons(int courseId, int moduleId)
+        public ActionResult<IEnumerable<Lesson>> GetLessons(int courseId, int moduleId)
         {
             int userId = 5;
             Course course = _dataRepository.IsEnrolled(userId, courseId) ?
                 _dataRepository.GetCourse(courseId) : null;
             Module module = course != null ? course.Modules.Where(m => m.Id == moduleId).FirstOrDefault() : null;
-            return module != null ? _dataRepository.GetModuleLessons(module.Id) : null;
+
+            if (module != null)
+                return Ok(_dataRepository.GetModuleLessons(module.Id));
+            return NotFound();
         }
 
         [HttpGet("{courseId}/modules/{moduleId}/{lessonId}")]
-        public IEnumerable<Component> GetComponents(int courseId, int moduleId, int lessonId)
+        public ActionResult<IEnumerable<Component>> GetComponents(int courseId, int moduleId, int lessonId)
         {
             int userId = 5;
             Course course = _dataRepository.IsEnrolled(userId, courseId) ?
                 _dataRepository.GetCourse(courseId) : null;
             Module module = course != null ? course.Modules.Where(m => m.Id == moduleId).FirstOrDefault() : null;
             Lesson lesson = module != null ? module.Lessons.Where(l => l.Id == lessonId).FirstOrDefault() : null;
-            return _dataRepository.GetLessonComponents(lesson.Id);
+            if (lesson != null)
+                return Ok(_dataRepository.GetLessonComponents(lesson.Id));
+            return NotFound();
+
         }
 
         [HttpPost("comment")]
@@ -120,6 +117,11 @@ namespace Profound.Controllers
         public IActionResult PostEnrollment(int courseId)
         {
             int userId = 5;  // just dummy id till jwt introduced
+            Course course = _dataRepository.GetCourse(courseId);
+            if (course == null)
+            {
+                return NotFound();
+            }
             _dataRepository.PostEnrollment(new UserCourseEnrollment
             {
                 CourseId = courseId,
