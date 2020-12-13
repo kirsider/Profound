@@ -28,7 +28,7 @@ namespace Profound.Controllers
             return _dataRepository.GetCourses().Where(c => c.CreatorId == teacherId);
         }
 
-        [HttpGet("courses/{courseId}")]
+        [HttpGet("course/{courseId}")]
         public ActionResult<Course> GetCourse(int courseId)
         {
             Course course = _dataRepository.GetCourse(courseId);
@@ -41,56 +41,59 @@ namespace Profound.Controllers
         }
 
         [HttpPost("courses/create")]
-        public ActionResult<Course> CreateCourse(CourseViewModel courseViewModel)
+        public ActionResult<Course> CreateCourse(PostCourseViewModel courseViewModel)
         {
             var course = _dataRepository.CreateCourse(courseViewModel.course);
             foreach (var category in courseViewModel.CourseCategories)
             {
                 if (_dataRepository.GetCategory(category.Id) != null)
-                    _dataRepository.CreateRecordingForCategoryCourse(course.Id, category.Id);
+                    _dataRepository.CreateCategoryCourse(course.Id, category.Id);
             }
             return CreatedAtAction("CreateCourse", course);
         }
 
-        [HttpDelete("courses/{courseId}")]
+        [HttpPost("course/modules/create")]
+        public ActionResult<Course> CreateModule(Module module)
+        {
+            var course = _dataRepository.CreateModule(module);
+            return CreatedAtAction("CreateModule", module);
+        }
+
+        [HttpDelete("course/{courseId}")]
         public ActionResult DeleteCourse(int course_id)
         {
-            var course = _dataRepository.GetCourse(course_id);
-
+            var course = _dataRepository.GetBaseCourse(course_id);
             if (course == null)
             {
                 return NotFound();
             }
+
             _dataRepository.DeleteСourse(course_id);
             return NoContent();
         }
 
-        [HttpPost("courses/{course_id}/requestToPublish")]
-        public ActionResult RequestToPublish(int course_id)
+        [HttpPost("course/{courseId}/requestToPublish")]
+        public ActionResult RequestToPublish(int courseId)
         {
-            var course = _dataRepository.RequestToPublish(course_id);
+            var course = _dataRepository.GetBaseCourse(courseId);
             if (course != null)
             {
+                _dataRepository.RequestToPublish(courseId);
                 return Ok(); 
             }
-            else
-            {
-               return NotFound();
-            }
+            return NotFound();
         }
 
-        [HttpPost("courses/{course_id}/publish")]
-        public ActionResult PublishCourse(int course_id)
+        [HttpPost("course/{courseId}/publish")]
+        public ActionResult PublishCourse(int courseId)
         {
-            var course = _dataRepository.PublishCourse(course_id);
+            var course = _dataRepository.GetBaseCourse(courseId);
             if (course != null)
             {
+                _dataRepository.PublishCourse(courseId);
                 return Ok();
             }
-            else
-            {
-                return NotFound();
-            }
+            return NotFound();
         }
     }
 }
