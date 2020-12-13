@@ -5,12 +5,13 @@ using System.Threading.Tasks;
 
 namespace Profound.Data.Models
 {
-    public class Comment
+    public class UserCourseEnrollment
     {
         public int Id { get; set; }
         public int UserId { get; set; }
-        public int ComponentId { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public string Text { get; set; }
+        public int CourseId { get; set; }
+
+        public string Status { get; set; }
+
     }
 }
