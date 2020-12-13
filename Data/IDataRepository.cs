@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Profound.Data.Models;
+using Profound.Data.ViewModels;
 
 namespace Profound.Data
 {
@@ -43,6 +44,9 @@ namespace Profound.Data
         Course RequestToPublish(int course_id);
         Course PublishCourse(int course_id);
 
+        User LoginUser(string email, string password);
+
+        void RegisterUser(RegisterViewModel model);
         void PostEnrollment(UserCourseEnrollment enrollment);
         void PostPurchase(Payment payment);
 

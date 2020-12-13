@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Profound.Data.Models;
 using Dapper;
 using MySql.Data.MySqlClient;
+using Profound.Data.ViewModels;
 
 namespace Profound.Data
 {
@@ -250,6 +251,29 @@ namespace Profound.Data
             else
             {
                 return null;
+            }
+        }
+
+        public User LoginUser(string email, string password)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                return connection.QueryFirstOrDefault<User>(@"SELECT id, role_id as roleId, email, last_name as " +
+                    "lastName, first_name as firstName FROM user WHERE email=@Email and password_hash = MD5(@Password);",
+                    new { Email = email, Password = password });
+            }
+        }
+
+        public void RegisterUser(RegisterViewModel model)
+        {
+            int user_role = 1;
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(@"INSERT INTO user(role_id, first_name, last_name, email, password_hash) 
+                VALUES (@FirstName, @LastName, @Email, MD5(@Password));",
+                new { user_role, model.FirstName, model.LastName, model.Email, model.Password });
             }
         }
 
