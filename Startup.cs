@@ -30,13 +30,6 @@ namespace Profound
         {
             services.AddControllers();
             services.AddScoped<IDataRepository, DataRepository>();
-            services.AddCors(options =>
-                options.AddPolicy("CorsPolicy", builder =>
-                    builder.AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .WithOrigins("http://localhost:3000")
-                    .AllowCredentials())
-                );
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
                     {
@@ -52,6 +45,14 @@ namespace Profound
                             ValidateIssuerSigningKey = true,
                         };
                     });
+            services.AddCors(options =>
+                options.AddPolicy("CorsPolicy", builder =>
+                    builder.AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .WithOrigins("http://localhost:3000")
+                    .AllowCredentials())
+                );
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
