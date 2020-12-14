@@ -13,5 +13,6 @@ namespace Profound.Data.Models
 
         public string Status { get; set; }
 
+        public int CurrentLessonId { get; set; }
     }
 }
