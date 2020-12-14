@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Profound.Data;
 using Profound.Data.Models;
+using Profound.Data.ViewModels;
 
 namespace Profound.Controllers
 {
@@ -27,52 +28,49 @@ namespace Profound.Controllers
         }
 
         [HttpGet("{courseId}")]
-        public ActionResult<Course> GetCourse(int courseId)
+        public ActionResult<UserCourseViewModel> GetCourse(int courseId)
         {
-            int userId = 5;
-
-            // return basic course details for overview mode, extended course data - for course passing
-            Course course = _dataRepository.IsEnrolled(userId, courseId) ?
-                _dataRepository.GetCourse(courseId) : _dataRepository.GetBaseCourse(courseId);
-
+            Course course = _dataRepository.GetCourse(courseId);
             if (course == null)
             {
                 return NotFound();
             }
-            return course;
+
+            var courseCategories = _dataRepository.GetCourseCategories(courseId);
+            int userId = 3;  // dummy user_id 
+            var lastLessonId = _dataRepository.GetLastLessonId(courseId, userId);
+
+            return Ok(new UserCourseViewModel
+            {   
+               Course = course,
+               CourseCategories = courseCategories.ToList(),
+               LastLessonId = lastLessonId
+            });
         }
 
-        [HttpGet("{courseId}/modules")]
-        public IEnumerable<Module> GetModules(int courseId)
+        [HttpGet("{courseId}/lesson/{lessonId}")]
+        public ActionResult<Lesson> GetLesson(int courseId, int lessonId)
         {
-            int userId = 5;
-            Course course = _dataRepository.IsEnrolled(userId, courseId) ?
-                _dataRepository.GetCourse(courseId) : null;
-            return course != null ? _dataRepository.GetCourseModules(courseId) : null;
+            int userId = 5;  // dummy user_id
+
+            Course course = _dataRepository.GetBaseCourse(courseId);
+            if (course == null)
+            {
+                return NotFound();
+            }
+
+            LessonViewModel lesson = _dataRepository.GetLesson(lessonId, userId);
+
+            if (lesson == null)
+            {
+                return NotFound();
+            }
+            _dataRepository.UpdateLastLessonId(lessonId, courseId, userId);
+
+            return Ok(lesson);
         }
 
-        [HttpGet("{courseId}/modules/{moduleId}")]
-        public IEnumerable<Lesson> GetLessons(int courseId, int moduleId)
-        {
-            int userId = 5;
-            Course course = _dataRepository.IsEnrolled(userId, courseId) ?
-                _dataRepository.GetCourse(courseId) : null;
-            Module module = course != null ? course.Modules.Where(m => m.Id == moduleId).FirstOrDefault() : null;
-            return module != null ? _dataRepository.GetModuleLessons(module.Id) : null;
-        }
-
-        [HttpGet("{courseId}/modules/{moduleId}/{lessonId}")]
-        public IEnumerable<Component> GetComponents(int courseId, int moduleId, int lessonId)
-        {
-            int userId = 5;
-            Course course = _dataRepository.IsEnrolled(userId, courseId) ?
-                _dataRepository.GetCourse(courseId) : null;
-            Module module = course != null ? course.Modules.Where(m => m.Id == moduleId).FirstOrDefault() : null;
-            Lesson lesson = module != null ? module.Lessons.Where(l => l.Id == lessonId).FirstOrDefault() : null;
-            return _dataRepository.GetLessonComponents(lesson.Id);
-        }
-
-        [HttpPost("comment")]
+        [HttpPost("comments")]
         public ActionResult<Comment> PostComment(CommentPostRequest commentPostRequest)
         {
             var savedComment = _dataRepository.PostComment(new Comment
@@ -120,6 +118,11 @@ namespace Profound.Controllers
         public IActionResult PostEnrollment(int courseId)
         {
             int userId = 5;  // just dummy id till jwt introduced
+            Course course = _dataRepository.GetBaseCourse(courseId);
+            if (course == null)
+            {
+                return NotFound();
+            }
             _dataRepository.PostEnrollment(new UserCourseEnrollment
             {
                 CourseId = courseId,

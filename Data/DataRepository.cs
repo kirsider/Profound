@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Profound.Data.Models;
 using Dapper;
 using MySql.Data.MySqlClient;
+using Profound.Data.ViewModels;
 
 namespace Profound.Data
 {
@@ -42,6 +43,18 @@ namespace Profound.Data
             }
         }
 
+        public int GetLastLessonId(int courseId, int userId)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                return connection.QueryFirstOrDefault<int>(
+                    @"SELECT last_lesson_id  FROM User_course_enrollment WHERE user_id=@UserId and course_id=@CourseId",
+                    new { UserId = userId, CourseId = courseId }
+                );
+            }
+        }
+
         public IEnumerable<Role> GetRoles()
         {
             using (var connection = new MySqlConnection(_connectionString))
@@ -63,6 +76,22 @@ namespace Profound.Data
                         acceptance_percantage AS acceptancePercantage, requirements, 
                         `status`, published_at AS publishedAt FROM Course;"
                 );
+            }
+        }
+
+        public IEnumerable<Category> GetCourseCategories(int courseId)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                var categories = connection.Query<Category>(
+                    @"SELECT c.id, name FROM Category_Course cc 
+                        JOIN Category c ON cc.category_id = c.id
+                        WHERE cc.course_id = @CourseId;", 
+                    new { CourseId = courseId }
+                );
+
+                return categories;
             }
         }
 
@@ -95,31 +124,59 @@ namespace Profound.Data
                       WHERE module_id=@ModuleId ORDER BY `order`;", new { ModuleId = moduleId }
                 );
 
-                foreach (var lesson in lessons)
-                {
-                    lesson.Components = GetLessonComponents(lesson.Id);
-                }
-
                 return lessons;
             }
         }
 
-        public IEnumerable<Component> GetLessonComponents(int lessonId)
+
+        public IEnumerable<ComponentViewModel> GetComponents(int lessonId, int userId)
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
-                var components = connection.Query<Component>(
-                    @"SELECT id, lesson_id AS lessonId, max_points AS maxPoints, component_type AS componentType, `content`, `order` FROM Component
-                      WHERE lesson_id=@LessonId ORDER BY `order`;", new { LessonId = lessonId }
+                var componentVMs = connection.Query<ComponentViewModel>(
+                  @"SELECT c.id, lesson_id AS lessonId, max_points AS maxPoints, component_type AS componentType, 
+                      `content`, `order`, (CASE WHEN status IN ('correct', 'wrong') THEN 1 ELSE 0 END) AS completed
+                      FROM User_solution AS us JOIN Component AS c ON us.component_id = c.id
+                      WHERE c.lesson_id=@LessonId AND us.user_id = @UserId ORDER BY `order`;",
+                  new { LessonId = lessonId, UserId = userId }
                 );
 
-                foreach (var component in components)
+             foreach (var componentVM in componentVMs)
                 {
-                    component.Comments = GetComponentComments(component.Id);
+                    componentVM.Comments = GetComponentComments(componentVM.Id);
+                }
+                return componentVMs;
+            }
+        }
+
+
+        public LessonViewModel GetLesson(int lessonId, int userId)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                
+                var lesson = connection.QueryFirstOrDefault<Lesson>(
+                    @"SELECT id, module_id AS moduleId, `name`, `order` FROM Lesson
+                      WHERE id=@LessonId ORDER BY `order`;", new { LessonId = lessonId }
+                );
+                LessonViewModel lessonVM = null;
+
+
+                if (lesson != null)
+                {
+                    lessonVM = new LessonViewModel
+                    {
+                        Id = lesson.Id,
+                        ModuleId = lesson.ModuleId,
+                        Name = lesson.Name,
+                        Order = lesson.Order
+                    };
+                    lessonVM.Components = GetComponents(lessonId, userId);
                 }
 
-                return components;
+                return lessonVM;
             }
         }
 
@@ -203,18 +260,6 @@ namespace Profound.Data
             }
         }
 
-        public IEnumerable<Comment> GetCommentsFromComponent(int component_id)
-        {
-            using (var connection = new MySqlConnection(_connectionString))
-            {
-                connection.Open();
-                return connection.Query<Comment>(
-                    @"SELECT id, user_id AS userId, component_id as componentId,
-                        `text`, created_at as createdAt FROM Comment WHERE component_id = @ComponentId ORDER BY created_at;",
-                    new { ComponentId = component_id });
-            }
-        }
-
         public void ChangeCourseStatus(string status, int course_id)
         {
             using (var connection = new MySqlConnection(_connectionString))
@@ -227,30 +272,22 @@ namespace Profound.Data
             }
         }
 
-        public Course RequestToPublish(int course_id)
+        public void RequestToPublish(int course_id)
         {
             ChangeCourseStatus("on_moderation", course_id);
-            if (GetCourse(course_id) != null)
-            {
-                return GetCourse(course_id);
-            }
-            else
-            {
-                return null;
-            }
         }
 
-        public Course PublishCourse(int course_id)
+        public void PublishCourse(int courseId)
         {
-            ChangeCourseStatus("published", course_id);
-            if (GetCourse(course_id) != null)
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                return GetCourse(course_id);
+                connection.Open();
+                connection.Execute(
+                    @"UPDATE Course SET published_at=@PublishedAt WHERE id=@CourseId;",
+                    new { PublishedAt = DateTime.Now, CourseId = courseId }
+                );
             }
-            else
-            {
-                return null;
-            }
+            ChangeCourseStatus("published", courseId);
         }
 
         public Comment PostComment(Comment comment)
@@ -270,7 +307,7 @@ namespace Profound.Data
             }
         }
 
-        public void CreateRecordingForCategoryCourse(int courseId, int categoryId)
+        public void CreateCategoryCourse(int courseId, int categoryId)
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
@@ -285,7 +322,6 @@ namespace Profound.Data
 
         public Course CreateCourse(Course course)
         {
-            string status = "dev";
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
@@ -303,32 +339,11 @@ namespace Profound.Data
                         Price = course.Price,
                         AcceptancePercantage = course.AcceptancePercantage,
                         Requirements = course.Requirements,
-                        Status = status,
+                        Status = course.Status,
                         PublishedAt = DateTime.Now
                     }
                 ));
                 course.Id = courseId;
-                foreach (var module in course.Modules)
-                {
-                    module.CourseId = courseId;
-                    var createdModule = CreateModule(module);
-                    module.Id = createdModule.Id;
-                    foreach (var lesson in module.Lessons)
-                    {
-                        lesson.ModuleId = module.Id;
-                        var createdLesson = CreateLesson(lesson);
-                        lesson.Id = createdLesson.Id;
-                        foreach (var component in lesson.Components)
-                        {
-                            component.LessonId = lesson.Id;
-                            var createdComponent = CreateComponent(component);
-                            component.Id = createdComponent.Id;
-                            component.Comments = GetCommentsFromComponent(component.Id);
-                        }
-                    }
-                }
-
-
                 return course;
             }
         }
@@ -349,8 +364,14 @@ namespace Profound.Data
                         Order = module.Order
                     }
                 ));
-
                 module.Id = moduleId;
+                foreach (var lesson in module.Lessons)
+                {
+                    lesson.ModuleId = module.Id;
+                    var createdLesson = CreateLesson(lesson);
+                    lesson.Id = createdLesson.Id;
+                }
+
                 return module;
             }
         }
@@ -373,6 +394,13 @@ namespace Profound.Data
                 ));
 
                 lesson.Id = lessonId;
+                foreach (var component in lesson.Components)
+                {
+                    component.LessonId = lesson.Id;
+                    var createdComponent = CreateComponent(component);
+                    component.Id = createdComponent.Id;
+                }
+
                 return lesson;
             }
         }
@@ -517,6 +545,18 @@ namespace Profound.Data
                 connection.Execute(
                     @"INSERT INTO Payment(course_id, user_id) VALUES (@CourseId, @UserId);",
                     new { CourseId = payment.CourseId, UserId = payment.UserId }
+                );
+            }
+        }
+
+        public void UpdateLastLessonId(int lessonId, int courseId, int userId)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"UPDATE User_course_enrollment SET last_lesson_id = @LessonId WHERE course_id = @CourseId AND user_id = @UserId;",
+                    new { LessonId = lessonId, CourseId = courseId, UserId = userId }
                 );
             }
         }
