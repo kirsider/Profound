@@ -25,7 +25,6 @@ namespace Profound.Controllers
             _dataRepository = dataRepository;
         }
         
-        [EnableCors("CorsPolicy")]
         [HttpPost("token")]
         public IActionResult Token(LoginViewModel model)
         {

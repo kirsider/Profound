@@ -30,21 +30,6 @@ namespace Profound
         {
             services.AddControllers();
             services.AddScoped<IDataRepository, DataRepository>();
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddJwtBearer(options =>
-                    {
-                        options.RequireHttpsMetadata = false;
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {                            
-                            ValidateIssuer = true,                            
-                            ValidIssuer = AuthOptions.ISSUER,                            
-                            ValidateAudience = true,                            
-                            ValidAudience = AuthOptions.AUDIENCE,                            
-                            ValidateLifetime = true,
-                            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),                            
-                            ValidateIssuerSigningKey = true,
-                        };
-                    });
             services.AddCors(options =>
                 options.AddPolicy("CorsPolicy", builder =>
                     builder.AllowAnyMethod()
@@ -52,7 +37,21 @@ namespace Profound
                     .WithOrigins("http://localhost:3000")
                     .AllowCredentials())
                 );
-            
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                    {
+                        options.RequireHttpsMetadata = false;
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidIssuer = AuthOptions.ISSUER,
+                            ValidateAudience = true,
+                            ValidAudience = AuthOptions.AUDIENCE,
+                            ValidateLifetime = true,
+                            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+                            ValidateIssuerSigningKey = true,
+                        };
+                    });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,12 +66,7 @@ namespace Profound
                 app.UseHttpsRedirection();
             }
 
-            //app.UseCors("CorsPolicy",);
-            app.UseCors(builder =>
-            builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
-            
+            app.UseCors("CorsPolicy");
 
             app.UseHttpsRedirection();
 
