@@ -19,15 +19,53 @@ namespace Profound.Data
             _connectionString = configuration["ConnectionStrings:AzureConnection"];
         }
 
+        public User LoginUser(string email, string password)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                var user = connection.QueryFirstOrDefault<User>(@"SELECT id, role_id as roleId, email, last_name as " +
+                    "lastName, first_name as firstName FROM user WHERE email=@Email and password_hash = MD5(@Password);",
+                    new { Email = email, Password = password });
+                user.Role = GetRoles().Where(r => r.Id == user.RoleId).FirstOrDefault();
+                return user;
+            }
+        }
+
+        public void RegisterUser(RegisterViewModel model)
+        {
+            int user_role = 1;
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(@"INSERT INTO user(role_id, first_name, last_name, email, password_hash) 
+                VALUES (@FirstName, @LastName, @Email, MD5(@Password));",
+                new { user_role, model.FirstName, model.LastName, model.Email, model.Password });
+            }
+        }
+
+        public int GetUserIdByEmail(string email)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                return connection.QueryFirstOrDefault<int>(@"SELECT id FROM user WHERE email=@Email;",
+                    new { Email = email });
+            }
+        }
 
         public IEnumerable<User> GetUsers()
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
-                return connection.Query<User>(
+                IEnumerable<User> users = connection.Query<User>(
                     @"SELECT id, role_id AS roleId, email, first_name AS firstName, last_name AS lastName FROM User;"
                 );
+                foreach(var user in users)
+                {
+                    user.Role = GetRoles().Where(r => r.Id == user.RoleId).FirstOrDefault();
+                }
+                return users;
             }
         }
 
@@ -87,7 +125,7 @@ namespace Profound.Data
                 var categories = connection.Query<Category>(
                     @"SELECT c.id, name FROM Category_Course cc 
                         JOIN Category c ON cc.category_id = c.id
-                        WHERE cc.course_id = @CourseId;", 
+                        WHERE cc.course_id = @CourseId;",
                     new { CourseId = courseId }
                 );
 
@@ -142,7 +180,7 @@ namespace Profound.Data
                   new { LessonId = lessonId, UserId = userId }
                 );
 
-             foreach (var componentVM in componentVMs)
+                foreach (var componentVM in componentVMs)
                 {
                     componentVM.Comments = GetComponentComments(componentVM.Id);
                 }
@@ -156,7 +194,7 @@ namespace Profound.Data
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
-                
+
                 var lesson = connection.QueryFirstOrDefault<Lesson>(
                     @"SELECT id, module_id AS moduleId, `name`, `order` FROM Lesson
                       WHERE id=@LessonId ORDER BY `order`;", new { LessonId = lessonId }
