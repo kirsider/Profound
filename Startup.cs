@@ -28,6 +28,13 @@ namespace Profound
         {
             services.AddControllers();
             services.AddScoped<IDataRepository, DataRepository>();
+            services.AddCors(options =>
+                options.AddPolicy("CorsPolicy", builder =>
+                    builder.AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .WithOrigins("http://localhost:3000")
+                    .AllowCredentials())
+                );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,6 +48,8 @@ namespace Profound
             {
                 app.UseHttpsRedirection();
             }
+
+            app.UseCors("CorsPolicy");
 
             app.UseHttpsRedirection();
 
