@@ -20,6 +20,11 @@ namespace Profound.Data
         IEnumerable<Comment> GetComponentComments(int componentId);
         IEnumerable<Category> GetCourseCategories(int courseId);
 
+        User LoginUser(string email, string password);
+        void RegisterUser(RegisterViewModel model);
+
+        int GetUserIdByEmail(string email);
+
         bool IsEnrolled(int userId, int courseId);
         User GetUser(int userId);
         LessonViewModel GetLesson(int lessonId, int userId);
