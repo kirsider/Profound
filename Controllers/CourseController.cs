@@ -28,7 +28,7 @@ namespace Profound.Controllers
         }
 
         [HttpGet("{courseId}")]
-        public ActionResult<CourseViewModel> GetCourse(int courseId)
+        public ActionResult<UserCourseViewModel> GetCourse(int courseId)
         {
             Course course = _dataRepository.GetCourse(courseId);
             if (course == null)
@@ -40,7 +40,7 @@ namespace Profound.Controllers
             int userId = 3;  // dummy user_id 
             var lastLessonId = _dataRepository.GetLastLessonId(courseId, userId);
 
-            return Ok(new CourseViewModel
+            return Ok(new UserCourseViewModel
             {   
                Course = course,
                CourseCategories = courseCategories.ToList(),
@@ -70,7 +70,7 @@ namespace Profound.Controllers
             return Ok(lesson);
         }
 
-        [HttpPost("comment")]
+        [HttpPost("comments")]
         public ActionResult<Comment> PostComment(CommentPostRequest commentPostRequest)
         {
             var savedComment = _dataRepository.PostComment(new Comment

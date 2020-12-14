@@ -29,20 +29,26 @@ namespace Profound.Controllers
         }
 
         [HttpGet("course/{courseId}")]
-        public ActionResult<Course> GetCourse(int courseId)
+        public ActionResult<TeacherCourseViewModel> GetCourse(int courseId)
         {
             Course course = _dataRepository.GetCourse(courseId);
-
             if (course == null)
             {
                 return NotFound();
             }
-            return course;
+
+            var courseCategories = _dataRepository.GetCourseCategories(courseId);
+            return Ok(new TeacherCourseViewModel
+            {
+                Course = course,
+                CourseCategories = courseCategories.ToList()
+            });
         }
 
-        [HttpPost("courses/create")]
+        [HttpPost("courses")]
         public ActionResult<Course> CreateCourse(PostCourseViewModel courseViewModel)
         {
+            courseViewModel.course.Status = "dev";
             var course = _dataRepository.CreateCourse(courseViewModel.course);
             foreach (var category in courseViewModel.CourseCategories)
             {
@@ -52,7 +58,7 @@ namespace Profound.Controllers
             return CreatedAtAction("CreateCourse", course);
         }
 
-        [HttpPost("course/modules/create")]
+        [HttpPost("course/modules")]
         public ActionResult<Course> CreateModule(Module module)
         {
             var course = _dataRepository.CreateModule(module);

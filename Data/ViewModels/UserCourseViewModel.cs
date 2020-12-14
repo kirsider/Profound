@@ -6,7 +6,7 @@ using Profound.Data.Models;
 
 namespace Profound.Data.ViewModels
 {
-    public class CourseViewModel
+    public class UserCourseViewModel
     {
         public Course Course { get; set; }
 

@@ -136,7 +136,7 @@ namespace Profound.Data
                 connection.Open();
                 var componentVMs = connection.Query<ComponentViewModel>(
                   @"SELECT c.id, lesson_id AS lessonId, max_points AS maxPoints, component_type AS componentType, 
-                      `content`, `order`, (CASE WHEN status != 'uncompleted' THEN 1 ELSE 0 END) AS completed
+                      `content`, `order`, (CASE WHEN status IN ('correct', 'wrong') THEN 1 ELSE 0 END) AS completed
                       FROM User_solution AS us JOIN Component AS c ON us.component_id = c.id
                       WHERE c.lesson_id=@LessonId AND us.user_id = @UserId ORDER BY `order`;",
                   new { LessonId = lessonId, UserId = userId }
@@ -277,9 +277,17 @@ namespace Profound.Data
             ChangeCourseStatus("on_moderation", course_id);
         }
 
-        public void PublishCourse(int course_id)
+        public void PublishCourse(int courseId)
         {
-            ChangeCourseStatus("published", course_id);
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"UPDATE Course SET published_at=@PublishedAt WHERE id=@CourseId;",
+                    new { PublishedAt = DateTime.Now, CourseId = courseId }
+                );
+            }
+            ChangeCourseStatus("published", courseId);
         }
 
         public Comment PostComment(Comment comment)
@@ -314,7 +322,6 @@ namespace Profound.Data
 
         public Course CreateCourse(Course course)
         {
-            string status = "dev";
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
@@ -332,7 +339,7 @@ namespace Profound.Data
                         Price = course.Price,
                         AcceptancePercantage = course.AcceptancePercantage,
                         Requirements = course.Requirements,
-                        Status = status,
+                        Status = course.Status,
                         PublishedAt = DateTime.Now
                     }
                 ));
