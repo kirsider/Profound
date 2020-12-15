@@ -41,10 +41,10 @@ namespace Profound.Controllers
             var lastLessonId = _dataRepository.GetLastLessonId(courseId, userId);
 
             return Ok(new UserCourseViewModel
-            {   
-               Course = course,
-               CourseCategories = courseCategories.ToList(),
-               LastLessonId = lastLessonId
+            {
+                Course = course,
+                CourseCategories = courseCategories.ToList(),
+                LastLessonId = lastLessonId
             });
         }
 
@@ -68,6 +68,13 @@ namespace Profound.Controllers
             _dataRepository.UpdateLastLessonId(lessonId, courseId, userId);
 
             return Ok(lesson);
+        }
+
+        [HttpPost("lessons")]
+        public ActionResult<Lesson> PostLesson(PostLessonViewModel model)
+        {
+            _dataRepository.PostLesson(model);
+            return Ok();
         }
 
         [HttpPost("comments")]
