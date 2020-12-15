@@ -88,18 +88,6 @@ namespace Profound.Controllers
                 return Ok(); 
             }
             return NotFound();
-        }
-
-        [HttpPost("course/{courseId}/publish")]
-        public ActionResult PublishCourse(int courseId)
-        {
-            var course = _dataRepository.GetBaseCourse(courseId);
-            if (course != null)
-            {
-                _dataRepository.PublishCourse(courseId);
-                return Ok();
-            }
-            return NotFound();
-        }
+        }        
     }
 }

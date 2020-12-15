@@ -52,6 +52,7 @@ namespace Profound.Data
 
         void RequestToPublish(int course_id);
         void PublishCourse(int course_id);
+        void RejectCourse(int course_id);
 
         void PostEnrollment(UserCourseEnrollment enrollment);
         void PostPurchase(Payment payment);
