@@ -26,7 +26,7 @@ namespace Profound.Controllers
         }
 
         [HttpPost("token")]
-        public IActionResult Token([FromBody]LoginViewModel model)
+        public IActionResult Token(LoginViewModel model)
         {
             var identity = GetIdentity(model.Email, model.Password);
             if (identity == null)
