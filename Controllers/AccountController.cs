@@ -24,9 +24,9 @@ namespace Profound.Controllers
         {
             _dataRepository = dataRepository;
         }
-        
+
         [HttpPost("token")]
-        public IActionResult Token(LoginViewModel model)
+        public IActionResult Token([FromBody]LoginViewModel model)
         {
             var identity = GetIdentity(model.Email, model.Password);
             if (identity == null)
@@ -52,6 +52,18 @@ namespace Profound.Controllers
             };
 
             return new JsonResult(response);
+        }
+
+        [HttpPost("register")]
+        public IActionResult Register(RegisterViewModel model)
+        {
+            if (_dataRepository.LoginUser(model.Email, model.Password) != null)
+            {
+                return BadRequest(new { errorText = "Such user already exists!" });
+            }
+
+            _dataRepository.RegisterUser(model);
+            return Token(new LoginViewModel {Email = model.Email, Password = model.Password });
         }
 
         private ClaimsIdentity GetIdentity(string username, string password)

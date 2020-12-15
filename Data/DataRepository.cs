@@ -37,13 +37,13 @@ namespace Profound.Data
 
         public void RegisterUser(RegisterViewModel model)
         {
-            int user_role = 1;
+            int UserRole = 1;
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
                 connection.Execute(@"INSERT INTO user(role_id, first_name, last_name, email, password_hash) 
-                VALUES (@FirstName, @LastName, @Email, MD5(@Password));",
-                new { user_role, model.FirstName, model.LastName, model.Email, model.Password });
+                VALUES (@UserRole, @FirstName, @LastName, @Email, MD5(@Password));",
+                new { UserRole, model.FirstName, model.LastName, model.Email, model.Password });
             }
         }
 
