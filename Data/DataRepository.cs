@@ -27,7 +27,10 @@ namespace Profound.Data
                 var user = connection.QueryFirstOrDefault<User>(@"SELECT id, role_id as roleId, email, last_name as " +
                     "lastName, first_name as firstName FROM user WHERE email=@Email and password_hash = MD5(@Password);",
                     new { Email = email, Password = password });
-                user.Role = GetRoles().Where(r => r.Id == user.RoleId).FirstOrDefault();
+                if (user != null)
+                {
+                    user.Role = GetRoles().Where(r => r.Id == user.RoleId).FirstOrDefault();
+                }
                 return user;
             }
         }

@@ -30,13 +30,14 @@ namespace Profound
         {
             services.AddControllers();
             services.AddScoped<IDataRepository, DataRepository>();
-            services.AddCors(options =>
-                options.AddPolicy("CorsPolicy", builder =>
-                    builder.AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .WithOrigins("http://localhost:3000")
-                    .AllowCredentials())
-                );
+            services.AddCors(options => options.AddPolicy("CorsPolicy", builder =>
+            {
+                builder.WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+            }));
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
                     {
@@ -65,12 +66,10 @@ namespace Profound
             {
                 app.UseHttpsRedirection();
             }
-
-            app.UseCors("CorsPolicy");
-
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseCors("CorsPolicy");
 
             app.UseAuthentication();
             app.UseAuthorization();
