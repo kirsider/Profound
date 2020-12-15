@@ -146,9 +146,12 @@ namespace Profound.Data
                         FROM Module WHERE course_id = @CourseId ORDER BY `order`;", new { CourseId = courseId }
                 );
 
-                foreach (var module in modules)
+                if (modules != null)
                 {
-                    module.Lessons = GetModuleLessons(module.Id);
+                    foreach (var module in modules)
+                    {
+                        module.Lessons = GetModuleLessons(module.Id);
+                    }
                 }
 
                 return modules;
