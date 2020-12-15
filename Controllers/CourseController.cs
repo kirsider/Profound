@@ -37,7 +37,7 @@ namespace Profound.Controllers
             }
 
             var courseCategories = _dataRepository.GetCourseCategories(courseId);
-            int userId = 3;  // dummy user_id 
+            var userId = _dataRepository.GetUserIdByEmail(User.Identity.Name);
             var lastLessonId = _dataRepository.GetLastLessonId(courseId, userId);
 
             return Ok(new UserCourseViewModel
@@ -51,7 +51,7 @@ namespace Profound.Controllers
         [HttpGet("{courseId}/lesson/{lessonId}")]
         public ActionResult<Lesson> GetLesson(int courseId, int lessonId)
         {
-            int userId = 5;  // dummy user_id
+            var userId = _dataRepository.GetUserIdByEmail(User.Identity.Name);
 
             Course course = _dataRepository.GetBaseCourse(courseId);
             if (course == null)
@@ -76,7 +76,7 @@ namespace Profound.Controllers
             var savedComment = _dataRepository.PostComment(new Comment
             {
                 ComponentId = commentPostRequest.ComponentId,
-                UserId = 1,
+                UserId = _dataRepository.GetUserIdByEmail(User.Identity.Name),
                 Text = commentPostRequest.Text,
                 CreatedAt = DateTime.Now
             });
@@ -117,7 +117,7 @@ namespace Profound.Controllers
         [HttpPost("{courseId}/enroll")]
         public IActionResult PostEnrollment(int courseId)
         {
-            int userId = 5;  // just dummy id till jwt introduced
+            int userId = _dataRepository.GetUserIdByEmail(User.Identity.Name);  
             Course course = _dataRepository.GetBaseCourse(courseId);
             if (course == null)
             {
@@ -135,7 +135,7 @@ namespace Profound.Controllers
         [HttpPost("{courseId}/purchase")]
         public IActionResult Purchase(int courseId)
         {
-            int userId = 5;
+            int userId = _dataRepository.GetUserIdByEmail(User.Identity.Name);
             _dataRepository.PostPurchase(new Payment { CourseId = courseId, UserId = userId });
             _dataRepository.PostEnrollment(new UserCourseEnrollment
             {

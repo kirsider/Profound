@@ -31,7 +31,7 @@ namespace Profound.Controllers
             var identity = GetIdentity(model.Email, model.Password);
             if (identity == null)
             {
-                return BadRequest(new { errorText = "Invalid username or password." });
+                return BadRequest(new { errorText = "Invalid email or password." });
             }
 
             var now = DateTime.UtcNow;

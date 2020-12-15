@@ -84,6 +84,17 @@ namespace Profound.Data
             }
         }
 
+        public int GetCoursesCompletedByUser(int courseId, int userId)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                return Convert.ToInt32(connection.ExecuteScalar<int>(
+                    @"SELECT COUNT(*) FROM User_Course_Enrollment 
+                        WHERE course_id=@CourseId AND user_id=@UserId AND status='completed';",
+                    new { CourseId = courseId, UserId = userId}));
+            }
+        }
+
         public int GetLastLessonId(int courseId, int userId)
         {
             using (var connection = new MySqlConnection(_connectionString))
