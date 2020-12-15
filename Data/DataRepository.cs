@@ -143,7 +143,7 @@ namespace Profound.Data
                 connection.Open();
                 var modules = connection.Query<Module>(
                     @"SELECT id, course_id AS courseId, `name`, `order` 
-                        FROM Module WHERE course_id = 1 ORDER BY `order`;", new { CourseId = courseId }
+                        FROM Module WHERE course_id = @CourseId ORDER BY `order`;", new { CourseId = courseId }
                 );
 
                 foreach (var module in modules)
