@@ -522,6 +522,19 @@ namespace Profound.Data
             }
         }
 
+        public void CompleteCourse(CompleteCourseViewModel model)
+        {
+            string Completed = "completed";
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"UPDATE user_course_enrollment SET `status`=@Completed WHERE id=@CourseId and user_id=@UserId;",
+                    new { Completed, model.CourseId, model.UserId }
+                );
+            }
+        }
+
         public Comment PutComment(int commentId, CommentPutRequest commentPutRequest)
         {
             using (var connection = new MySqlConnection(_connectionString))

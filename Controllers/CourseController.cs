@@ -71,9 +71,16 @@ namespace Profound.Controllers
         }
 
         [HttpPost("lessons")]
-        public ActionResult<Lesson> PostLesson(PostLessonViewModel model)
+        public ActionResult PostLesson(PostLessonViewModel model)
         {
             _dataRepository.PostLesson(model);
+            return Ok();
+        }
+
+        [HttpPost("completeCourse")]
+        public ActionResult CompleteCourse(CompleteCourseViewModel model)
+        {
+            _dataRepository.CompleteCourse(model);
             return Ok();
         }
 

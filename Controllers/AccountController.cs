@@ -50,7 +50,7 @@ namespace Profound.Controllers
                 access_token = encodedJwt,
                 id = _dataRepository.GetUserIdByEmail(identity.Name)
             };
-
+            
             return new JsonResult(response);
         }
 
