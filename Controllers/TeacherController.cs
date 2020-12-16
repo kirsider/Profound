@@ -22,16 +22,17 @@ namespace Profound.Controllers
         }
 
         [HttpGet("courses")]
-        public IEnumerable<Course> GetCourses()
+        public IEnumerable<GetCourseViewModel> GetCourses()
         {
-            int teacherId = _dataRepository.GetUserIdByEmail(User.Identity.Name);  
-            return _dataRepository.GetCourses().Where(c => c.CreatorId == teacherId).ToList();
+            var teacherId = _dataRepository.GetUserByEmail(User.Identity.Name).Id;
+
+            return _dataRepository.GetCourses().Where(c => c.Creator.Id == teacherId).ToList();
         }
 
         [HttpGet("course/{courseId}")]
         public ActionResult<TeacherCourseViewModel> GetCourse(int courseId)
         {
-            Course course = _dataRepository.GetCourse(courseId);
+            GetCourseViewModel course = _dataRepository.GetCourse(courseId);
             if (course == null)
             {
                 return NotFound();

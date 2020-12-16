@@ -47,11 +47,13 @@ namespace Profound.Data
             }
         }
 
-        public int GetUserIdByEmail(string email)
+        public User GetUserByEmail(string email)
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
-                return connection.QueryFirstOrDefault<int>(@"SELECT id FROM user WHERE email=@Email;",
+                return connection.QueryFirstOrDefault<User>(
+                    @"SELECT id, role_id AS roleId, email, first_name AS firstName, last_name AS lastName 
+                        FROM user WHERE email=@Email;",
                     new { Email = email });
             }
         }
@@ -118,16 +120,43 @@ namespace Profound.Data
             }
         }
 
-        public IEnumerable<Course> GetCourses()
+        public IEnumerable<GetCourseViewModel> GetCourses()
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
-                return connection.Query<Course>(
+                var courses = connection.Query<Course>(
                     @"SELECT id, creator_id AS creatorId, `title`, description, price, 
                         acceptance_percantage AS acceptancePercantage, requirements, 
                         `status`, published_at AS publishedAt FROM Course;"
                 );
+
+                if (courses == null) return null;
+                List<GetCourseViewModel> courseVMs = new List<GetCourseViewModel>();
+                
+                foreach (var course in courses)
+                {
+                    var creator = GetUser(course.CreatorId);
+
+                    courseVMs.Add(new GetCourseViewModel
+                    {
+                        Id = course.Id,
+                        Creator = new CourseUserViewModel
+                        {
+                            Id = creator.Id,
+                            FirstName = creator.FirstName,
+                            LastName = creator.LastName
+                        },
+                        Title = course.Title,
+                        Description = course.Description,
+                        Price = course.Price,
+                        AcceptancePercantage = course.AcceptancePercantage,
+                        Status = course.Status,
+                        Requirements = course.Requirements,
+                        PublishedAt = course.PublishedAt
+                    });
+                }
+                return courseVMs;
             }
         }
 
@@ -262,19 +291,34 @@ namespace Profound.Data
             }
         }
 
-        public Course GetCourse(int courseId)
+        public GetCourseViewModel GetCourse(int courseId)
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
-                var course = GetBaseCourse(courseId);
+                var baseCourse = GetBaseCourse(courseId);
 
-                if (course != null)
+                if (baseCourse == null) return null;
+                
+                var creator = GetUser(baseCourse.CreatorId);
+                return new GetCourseViewModel
                 {
-                    course.Modules = GetCourseModules(courseId);
-                }
-
-                return course;
+                    Id = baseCourse.Id,
+                    Creator = new CourseUserViewModel
+                    {
+                        Id = creator.Id,
+                        FirstName = creator.FirstName,
+                        LastName = creator.LastName
+                    },
+                    Title = baseCourse.Title,
+                    Description = baseCourse.Description,
+                    Price = baseCourse.Price,
+                    AcceptancePercantage = baseCourse.AcceptancePercantage,
+                    Status = baseCourse.Status,
+                    Requirements = baseCourse.Requirements,
+                    PublishedAt = baseCourse.PublishedAt,
+                    Modules = GetCourseModules(courseId)
+                };
             }
         }
 
@@ -299,6 +343,15 @@ namespace Profound.Data
                 return connection.QueryFirstOrDefault<Category>(
                     @"SELECT id, `name` FROM Category WHERE id=@CategoryId;", new { CategoryId = categoryId }
                 );
+            }
+        }
+        public IEnumerable<Category> GetCategories()
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                return connection.Query<Category>(
+                    @"SELECT id, `name` FROM Category");
             }
         }
 

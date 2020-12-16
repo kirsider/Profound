@@ -8,8 +8,7 @@ namespace Profound.Data.ViewModels
 {
     public class UserCourseViewModel
     {
-        public Course Course { get; set; }
-
+        public GetCourseViewModel Course { get; set; }
         public IEnumerable<Category> CourseCategories { get; set; }
         public int LastLessonId { get; set; }
     }

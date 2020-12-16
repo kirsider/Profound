@@ -42,23 +42,12 @@ namespace Profound.Controllers
         {
             return _dataRepository.GetRoles();
         }
-
+/*
         [HttpGet("courses")]
         public IEnumerable<Course> GetCourses()
         {
             return _dataRepository.GetCourses();
-        }
-
-        [HttpGet("courses/{courseId}")]
-        public ActionResult<Course> GetCourse(int courseId)
-        {
-            var course = _dataRepository.GetCourse(courseId);
-            if (course == null)
-            {
-                return NotFound();
-            }
-            return course;
-        }
+        }*/
 
         [HttpGet("categories/{categoryId}")]
         public ActionResult<Category> GetCategory(int categoryId)
@@ -70,6 +59,5 @@ namespace Profound.Controllers
             }
             return category;
         }
-
     }
 }
