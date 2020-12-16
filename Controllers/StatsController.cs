@@ -62,7 +62,13 @@ namespace Profound.Controllers
                 return NotFound();
             }
 
-            int userId = _dataRepository.GetUserByEmail(User.Identity.Name).Id;
+            var identity = User.Identity;
+            if (identity.Name == null)
+            {
+                return Unauthorized("Error 401. Please, authorize first to get access to this resource.");
+            }
+
+            var userId = _dataRepository.GetUserByEmail(identity.Name).Id;
             var completedAmount = _dataRepository.GetCoursesCompletedByUser(courseId, userId);
 
             if (completedAmount < (int)Ranks.Amateur)
