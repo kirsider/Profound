@@ -93,7 +93,7 @@ namespace Profound.Data
                 return Convert.ToInt32(connection.ExecuteScalar<int>(
                     @"SELECT COUNT(*) FROM User_Course_Enrollment 
                         WHERE course_id=@CourseId AND user_id=@UserId AND status='completed';",
-                    new { CourseId = courseId, UserId = userId}));
+                    new { CourseId = courseId, UserId = userId }));
             }
         }
 
@@ -133,7 +133,7 @@ namespace Profound.Data
 
                 if (courses == null) return null;
                 List<GetCourseViewModel> courseVMs = new List<GetCourseViewModel>();
-                
+
                 foreach (var course in courses)
                 {
                     var creator = GetUser(course.CreatorId);
@@ -170,7 +170,7 @@ namespace Profound.Data
                         acceptance_percantage AS acceptancePercantage, requirements, 
                         c.`status`, published_at AS publishedAt FROM course AS c
                          JOIN user_course_enrollment AS uc ON(c.id = uc.course_id)
-                         WHERE uc.user_id = @UserId;", new { UserId = userId}
+                         WHERE uc.user_id = @UserId;", new { UserId = userId }
                 );
 
                 if (courses == null) return null;
@@ -342,7 +342,7 @@ namespace Profound.Data
                 var baseCourse = GetBaseCourse(courseId);
 
                 if (baseCourse == null) return null;
-                
+
                 var creator = GetUser(baseCourse.CreatorId);
                 return new GetCourseViewModel
                 {
@@ -501,6 +501,29 @@ namespace Profound.Data
                 ));
                 course.Id = courseId;
                 return course;
+            }
+        }
+
+        public Module GetModule(int module_id)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                return connection.QueryFirstOrDefault<Module>(
+                    @"SELECT id, course_id as courseId, `name`, `order` FROM module WHERE id=@ModuleId;",
+                    new { ModuleId = module_id });
+            }
+        }
+
+        public void DeleteModule(int module_id)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"DELETE FROM module WHERE id=@ModuleId;",
+                    new { ModuleId = module_id }
+                );
             }
         }
 
