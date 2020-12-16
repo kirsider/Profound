@@ -93,7 +93,7 @@ namespace Profound.Data
                 return Convert.ToInt32(connection.ExecuteScalar<int>(
                     @"SELECT COUNT(*) FROM User_Course_Enrollment 
                         WHERE course_id=@CourseId AND user_id=@UserId AND status='completed';",
-                    new { CourseId = courseId, UserId = userId}));
+                    new { CourseId = courseId, UserId = userId }));
             }
         }
 
@@ -133,7 +133,7 @@ namespace Profound.Data
 
                 if (courses == null) return null;
                 List<GetCourseViewModel> courseVMs = new List<GetCourseViewModel>();
-                
+
                 foreach (var course in courses)
                 {
                     var creator = GetUser(course.CreatorId);
@@ -342,7 +342,7 @@ namespace Profound.Data
                 var baseCourse = GetBaseCourse(courseId);
 
                 if (baseCourse == null) return null;
-                
+
                 var creator = GetUser(baseCourse.CreatorId);
                 return new GetCourseViewModel
                 {
@@ -595,6 +595,21 @@ namespace Profound.Data
                     VALUES(@UserId, @CourseId, IFNULL(@Status, 'in_process'));",
                     new { enrollment.UserId, enrollment.CourseId, enrollment.Status }
                 );
+                IEnumerable<int> component_ids = connection.Query<int>(
+                    @"SELECT id FROM component WHERE lesson_id IN (SELECT id FROM lesson WHERE module_id IN
+                      (SELECT id FROM module WHERE course_id in (SELECT id FROM course WHERE id=@CourseId)));",
+                    new { CourseId = enrollment.CourseId }
+                );
+                string Status = "uncompleted";
+                int Points = 0;
+                foreach (var ComponentId in component_ids)
+                {
+                    connection.Execute(
+                        @"INSERT INTO user_solution(component_id, user_id, `status`, points)
+                        VALUES(@ComponentId, @UserId, @Status, @Points);",
+                        new { ComponentId, enrollment.UserId, Status, Points}
+                    );
+                }
             }
         }
 
