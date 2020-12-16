@@ -160,6 +160,49 @@ namespace Profound.Data
             }
         }
 
+        public IEnumerable<GetCourseViewModel> GetUserCourses(int userId)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                var courses = connection.Query<Course>(
+                    @"SELECT c.id, creator_id AS creatorId, `title`, description, price, 
+                        acceptance_percantage AS acceptancePercantage, requirements, 
+                        c.`status`, published_at AS publishedAt FROM course AS c
+                         JOIN user_course_enrollment AS uc ON(c.id = uc.course_id)
+                         WHERE uc.user_id = @UserId;", new { UserId = userId}
+                );
+
+                if (courses == null) return null;
+                List<GetCourseViewModel> courseVMs = new List<GetCourseViewModel>();
+
+                foreach (var course in courses)
+                {
+                    var creator = GetUser(course.CreatorId);
+
+                    courseVMs.Add(new GetCourseViewModel
+                    {
+                        Id = course.Id,
+                        Creator = new CourseUserViewModel
+                        {
+                            Id = creator.Id,
+                            FirstName = creator.FirstName,
+                            LastName = creator.LastName
+                        },
+                        Title = course.Title,
+                        Description = course.Description,
+                        Price = course.Price,
+                        AcceptancePercantage = course.AcceptancePercantage,
+                        Status = course.Status,
+                        Requirements = course.Requirements,
+                        PublishedAt = course.PublishedAt
+                    });
+                }
+                return courseVMs;
+            }
+
+        }
+
         public IEnumerable<Category> GetCourseCategories(int courseId)
         {
             using (var connection = new MySqlConnection(_connectionString))

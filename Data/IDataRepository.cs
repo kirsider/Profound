@@ -13,6 +13,7 @@ namespace Profound.Data
         IEnumerable<Role> GetRoles();
         IEnumerable<User> GetUsers();
         IEnumerable<GetCourseViewModel> GetCourses();
+        IEnumerable<GetCourseViewModel> GetUserCourses(int userId);
         IEnumerable<Category> GetCategories();
 
         IEnumerable<Module> GetCourseModules(int courseId);

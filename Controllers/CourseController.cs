@@ -27,6 +27,19 @@ namespace Profound.Controllers
             return _dataRepository.GetCourses();
         }
 
+        [HttpGet("user")]
+        public ActionResult<IEnumerable<GetCourseViewModel>> GetUserCourses()
+        {
+            var identity = User.Identity;
+            if (identity.Name == null)
+            {
+                return Unauthorized("Error 401. Please, authorize first to get access to this resource.");
+            }
+
+            var userId = _dataRepository.GetUserByEmail(identity.Name).Id;
+            return Ok(_dataRepository.GetUserCourses(userId));
+        }
+
         [HttpGet("{courseId}")]
         public ActionResult<UserCourseViewModel> GetCourse(int courseId)
         {
