@@ -193,6 +193,7 @@ namespace Profound.Data
                         Description = course.Description,
                         Price = course.Price,
                         AcceptancePercantage = course.AcceptancePercantage,
+                        Progress = GetCourseProgress(course.Id, userId),
                         Status = course.Status,
                         Requirements = course.Requirements,
                         PublishedAt = course.PublishedAt
@@ -365,6 +366,29 @@ namespace Profound.Data
             }
         }
 
+        public double GetCourseProgress(int courseId, int userId)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                double userScore = connection.ExecuteScalar<int>(
+                    @"SELECT SUM(points) FROM user_solution WHERE user_id = @UserId;", new { UserId = userId }
+                );
+
+                double totalScore = connection.ExecuteScalar<int>(
+                    @"SELECT SUM(co.max_points) FROM course c JOIN module m ON (c.id = m.course_id) 
+                    JOIN lesson l ON(m.id = l.module_id) JOIN component co ON(l.id = co.lesson_id)
+                    WHERE c.id = @CourseId; ", new { CourseId = courseId }
+                );
+
+
+                if (totalScore == 0)
+                    return 0;
+
+                return userScore / totalScore;
+            }
+        }
 
         public bool IsEnrolled(int userId, int courseId)
         {
