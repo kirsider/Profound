@@ -24,7 +24,7 @@ namespace Profound.Controllers
         [HttpGet("courses")]
         public IEnumerable<Course> GetCourses()
         {
-            int teacherId = 1;  // dummy id
+            int teacherId = _dataRepository.GetUserIdByEmail(User.Identity.Name);  
             return _dataRepository.GetCourses().Where(c => c.CreatorId == teacherId);
         }
 
