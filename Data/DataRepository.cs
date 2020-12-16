@@ -373,7 +373,8 @@ namespace Profound.Data
                 connection.Open();
 
                 double userScore = connection.ExecuteScalar<int>(
-                    @"SELECT SUM(points) FROM user_solution WHERE user_id = @UserId;", new { UserId = userId }
+                    @"SELECT total_points FROM user_course_enrollment 
+                    WHERE user_id = @UserId AND course_id = @CourseId;", new { UserId = userId, CourseId = courseId }
                 );
 
                 double totalScore = connection.ExecuteScalar<int>(
@@ -383,7 +384,7 @@ namespace Profound.Data
                 );
 
 
-                if (totalScore == 0)
+                if (userScore == default || totalScore == 0)
                     return 0;
 
                 return userScore / totalScore;
