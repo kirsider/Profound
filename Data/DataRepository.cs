@@ -265,8 +265,15 @@ namespace Profound.Data
                 var componentVMs = connection.Query<ComponentViewModel>(
                   @"SELECT c.id, lesson_id AS lessonId, max_points AS maxPoints, component_type AS componentType, 
                       `content`, `order`, (CASE WHEN status IN ('correct', 'wrong') THEN 1 ELSE 0 END) AS completed
-                      FROM User_solution AS us JOIN Component AS c ON us.component_id = c.id
-                      WHERE c.lesson_id=@LessonId AND us.user_id = @UserId ORDER BY `order`;",
+                      FROM Component AS c JOIN User_solution AS us ON us.component_id = c.id
+                      WHERE c.lesson_id=@LessonId AND us.user_id = @UserId
+                  UNION 
+                      SELECT c1.id, lesson_id AS lessonId, max_points AS maxPoints, component_type AS componentType, 
+                      `content`, `order`, 0 AS completed
+                      FROM Component c1
+                      WHERE c1.id NOT IN (SELECT component_id FROM User_solution AS us1 
+                                        WHERE c1.lesson_id = @LessonId AND us1.user_id = @UserId) and c1.lesson_id = @LessonId
+                      ORDER BY `order`;",
                   new { LessonId = lessonId, UserId = userId }
                 );
 
