@@ -32,7 +32,8 @@ namespace Profound.Data
         Course GetCourse(int courseId);
         Course GetBaseCourse(int courseId);
         int GetLastLessonId(int courseId, int userId);
-
+        void PostLesson(PostLessonViewModel model);
+        void CompleteCourse(CompleteCourseViewModel model);
         Category GetCategory(int categoryId);
         Comment GetComment(int commentId);
         CourseStats GetCourseStats(int courseId, int offset, int limit);

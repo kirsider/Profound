@@ -64,7 +64,7 @@ namespace Profound.Data
                 IEnumerable<User> users = connection.Query<User>(
                     @"SELECT id, role_id AS roleId, email, first_name AS firstName, last_name AS lastName FROM User;"
                 );
-                foreach(var user in users)
+                foreach (var user in users)
                 {
                     user.Role = GetRoles().Where(r => r.Id == user.RoleId).FirstOrDefault();
                 }
@@ -498,6 +498,45 @@ namespace Profound.Data
                     @"INSERT INTO User_course_enrollment(user_id, course_id, `status`) 
                     VALUES(@UserId, @CourseId, IFNULL(@Status, 'in_process'));",
                     new { enrollment.UserId, enrollment.CourseId, enrollment.Status }
+                );
+            }
+        }
+
+        public void PostLesson(PostLessonViewModel model)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                int lessonPoints = 0;
+                int userId = 0;
+                connection.Open();
+                foreach (var solution in model.Solutions)
+                {
+                    connection.Execute(
+                        @"INSERT INTO user_solution(component_id, user_id, `status`, points, answer)
+                                VALUES(@ComponentId, @UserId, @Status, @Points, @Answer);",
+                        new { solution.ComponentId, solution.UserId, solution.Status, solution.Points, solution.Answer }
+                    );
+                    userId = solution.UserId;
+                    lessonPoints += solution.Points;
+                }
+                connection.Execute(
+                        @"UPDATE user_course_enrollment SET last_lesson_id=@LastLessonId, total_points=
+                            total_points+@LessonPoints WHERE user_id=@UserId and course_id=@CourseId;",
+                        new { LastLessonId = model.LessonId, lessonPoints, userId, model.CourseId }
+                    );
+            }
+        }
+
+        public void CompleteCourse(CompleteCourseViewModel model)
+        {
+            string Completed = "completed";
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"UPDATE user_course_enrollment SET `status`=@Completed WHERE course_id=@CourseId 
+                        and user_id=@UserId;",
+                    new { Completed, model.CourseId, model.UserId }
                 );
             }
         }
