@@ -24,7 +24,7 @@ namespace Profound.Controllers
         [HttpGet("courses")]
         public IEnumerable<Course> GetCourses()
         {
-            int teacherId = 1;  // dummy id
+            int teacherId = _dataRepository.GetUserIdByEmail(User.Identity.Name);  
             return _dataRepository.GetCourses().Where(c => c.CreatorId == teacherId);
         }
 
@@ -88,18 +88,6 @@ namespace Profound.Controllers
                 return Ok(); 
             }
             return NotFound();
-        }
-
-        [HttpPost("course/{courseId}/publish")]
-        public ActionResult PublishCourse(int courseId)
-        {
-            var course = _dataRepository.GetBaseCourse(courseId);
-            if (course != null)
-            {
-                _dataRepository.PublishCourse(courseId);
-                return Ok();
-            }
-            return NotFound();
-        }
+        }        
     }
 }

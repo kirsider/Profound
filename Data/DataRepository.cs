@@ -327,6 +327,11 @@ namespace Profound.Data
             }
         }
 
+        public void RejectCourse(int course_id)
+        {
+            ChangeCourseStatus("dev", course_id);
+        }
+
         public void RequestToPublish(int course_id)
         {
             ChangeCourseStatus("on_moderation", course_id);
