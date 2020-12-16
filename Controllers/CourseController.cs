@@ -37,7 +37,13 @@ namespace Profound.Controllers
             }
 
             var courseCategories = _dataRepository.GetCourseCategories(courseId);
-            var userId = _dataRepository.GetUserByEmail(User.Identity.Name).Id;
+            var identity = User.Identity;
+            if (identity.Name == null)
+            {
+                return Unauthorized("Error 401. Please, authorize first to get access to this resource.");
+            }
+
+            var userId = _dataRepository.GetUserByEmail(identity.Name).Id;
             var lastLessonId = _dataRepository.GetLastLessonId(courseId, userId);
 
             return Ok(new UserCourseViewModel
@@ -51,7 +57,13 @@ namespace Profound.Controllers
         [HttpGet("{courseId}/lesson/{lessonId}")]
         public ActionResult<Lesson> GetLesson(int courseId, int lessonId)
         {
-            var userId = _dataRepository.GetUserByEmail(User.Identity.Name).Id;
+            var identity = User.Identity;
+            if (identity.Name == null)
+            {
+                return Unauthorized("Error 401. Please, authorize first to get access to this resource.");
+            }
+
+            var userId = _dataRepository.GetUserByEmail(identity.Name).Id;
 
             Course course = _dataRepository.GetBaseCourse(courseId);
             if (course == null)
@@ -87,10 +99,18 @@ namespace Profound.Controllers
         [HttpPost("comments")]
         public ActionResult<Comment> PostComment(CommentPostRequest commentPostRequest)
         {
+            var identity = User.Identity;
+            if (identity.Name == null)
+            {
+                return Unauthorized("Error 401. Please, authorize first to get access to this resource.");
+            }
+
+            var userId = _dataRepository.GetUserByEmail(identity.Name).Id;
+
             var savedComment = _dataRepository.PostComment(new Comment
             {
                 ComponentId = commentPostRequest.ComponentId,
-                UserId = _dataRepository.GetUserByEmail(User.Identity.Name).Id,
+                UserId = userId,
                 Text = commentPostRequest.Text,
                 CreatedAt = DateTime.Now
             });
@@ -131,7 +151,14 @@ namespace Profound.Controllers
         [HttpPost("{courseId}/enroll")]
         public IActionResult PostEnrollment(int courseId)
         {
-            int userId = _dataRepository.GetUserByEmail(User.Identity.Name).Id;  
+            var identity = User.Identity;
+            if (identity.Name == null)
+            {
+                return Unauthorized("Error 401. Please, authorize first to get access to this resource.");
+            }
+
+            var userId = _dataRepository.GetUserByEmail(identity.Name).Id;
+
             Course course = _dataRepository.GetBaseCourse(courseId);
             if (course == null)
             {
@@ -149,7 +176,14 @@ namespace Profound.Controllers
         [HttpPost("{courseId}/purchase")]
         public IActionResult Purchase(int courseId)
         {
-            int userId = _dataRepository.GetUserByEmail(User.Identity.Name).Id;
+            var identity = User.Identity;
+            if (identity.Name == null)
+            {
+                return Unauthorized("Error 401. Please, authorize first to get access to this resource.");
+            }
+
+            var userId = _dataRepository.GetUserByEmail(identity.Name).Id;
+
             _dataRepository.PostPurchase(new Payment { CourseId = courseId, UserId = userId });
             _dataRepository.PostEnrollment(new UserCourseEnrollment
             {
