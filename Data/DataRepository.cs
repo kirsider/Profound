@@ -529,7 +529,8 @@ namespace Profound.Data
             {
                 connection.Open();
                 connection.Execute(
-                    @"UPDATE user_course_enrollment SET `status`=@Completed WHERE id=@CourseId and user_id=@UserId;",
+                    @"UPDATE user_course_enrollment SET `status`=@Completed WHERE course_id=@CourseId 
+                        and user_id=@UserId;",
                     new { Completed, model.CourseId, model.UserId }
                 );
             }
