@@ -384,7 +384,7 @@ namespace Profound.Data
                 );
 
 
-                if (userScore == default || totalScore == 0)
+                if (totalScore == 0)
                     return 0;
 
                 return userScore / totalScore;
