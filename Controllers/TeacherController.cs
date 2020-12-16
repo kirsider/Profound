@@ -72,6 +72,18 @@ namespace Profound.Controllers
             return CreatedAtAction("CreateModule", module);
         }
 
+        [HttpDelete("course/modules/{moduleId}")]
+        public ActionResult<Course> DeleteModule(int moduleId)
+        {
+            var module = _dataRepository.GetModule(moduleId);
+            if (module == null)
+            {
+                return NotFound();
+            }
+            _dataRepository.DeleteModule(moduleId);
+            return NoContent();
+        }
+
         [HttpDelete("course/{courseId}")]
         public ActionResult DeleteCourse(int course_id)
         {
