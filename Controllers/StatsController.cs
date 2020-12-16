@@ -62,7 +62,7 @@ namespace Profound.Controllers
                 return NotFound();
             }
 
-            int userId = _dataRepository.GetUserIdByEmail(User.Identity.Name);
+            int userId = _dataRepository.GetUserByEmail(User.Identity.Name).Id;
             var completedAmount = _dataRepository.GetCoursesCompletedByUser(courseId, userId);
 
             if (completedAmount < (int)Ranks.Amateur)

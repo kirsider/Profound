@@ -22,7 +22,7 @@ namespace Profound.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Course> GetCourses()
+        public IEnumerable<GetCourseViewModel> GetCourses(int categoryId)
         {
             return _dataRepository.GetCourses();
         }
@@ -30,14 +30,14 @@ namespace Profound.Controllers
         [HttpGet("{courseId}")]
         public ActionResult<UserCourseViewModel> GetCourse(int courseId)
         {
-            Course course = _dataRepository.GetCourse(courseId);
+            GetCourseViewModel course = _dataRepository.GetCourse(courseId);
             if (course == null)
             {
                 return NotFound();
             }
 
             var courseCategories = _dataRepository.GetCourseCategories(courseId);
-            var userId = _dataRepository.GetUserIdByEmail(User.Identity.Name);
+            var userId = _dataRepository.GetUserByEmail(User.Identity.Name).Id;
             var lastLessonId = _dataRepository.GetLastLessonId(courseId, userId);
 
             return Ok(new UserCourseViewModel
@@ -51,7 +51,7 @@ namespace Profound.Controllers
         [HttpGet("{courseId}/lesson/{lessonId}")]
         public ActionResult<Lesson> GetLesson(int courseId, int lessonId)
         {
-            var userId = _dataRepository.GetUserIdByEmail(User.Identity.Name);
+            var userId = _dataRepository.GetUserByEmail(User.Identity.Name).Id;
 
             Course course = _dataRepository.GetBaseCourse(courseId);
             if (course == null)
@@ -90,7 +90,7 @@ namespace Profound.Controllers
             var savedComment = _dataRepository.PostComment(new Comment
             {
                 ComponentId = commentPostRequest.ComponentId,
-                UserId = _dataRepository.GetUserIdByEmail(User.Identity.Name),
+                UserId = _dataRepository.GetUserByEmail(User.Identity.Name).Id,
                 Text = commentPostRequest.Text,
                 CreatedAt = DateTime.Now
             });
@@ -131,7 +131,7 @@ namespace Profound.Controllers
         [HttpPost("{courseId}/enroll")]
         public IActionResult PostEnrollment(int courseId)
         {
-            int userId = _dataRepository.GetUserIdByEmail(User.Identity.Name);  
+            int userId = _dataRepository.GetUserByEmail(User.Identity.Name).Id;  
             Course course = _dataRepository.GetBaseCourse(courseId);
             if (course == null)
             {
@@ -149,7 +149,7 @@ namespace Profound.Controllers
         [HttpPost("{courseId}/purchase")]
         public IActionResult Purchase(int courseId)
         {
-            int userId = _dataRepository.GetUserIdByEmail(User.Identity.Name);
+            int userId = _dataRepository.GetUserByEmail(User.Identity.Name).Id;
             _dataRepository.PostPurchase(new Payment { CourseId = courseId, UserId = userId });
             _dataRepository.PostEnrollment(new UserCourseEnrollment
             {
@@ -159,5 +159,12 @@ namespace Profound.Controllers
 
             return Ok();
         }
+
+        [HttpGet("categories")]
+        public IEnumerable<Category> GetCategories()
+        {
+            return _dataRepository.GetCategories();
+        }
+
     }
 }

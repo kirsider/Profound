@@ -45,10 +45,13 @@ namespace Profound.Controllers
                     signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
 
+            var user = _dataRepository.GetUserByEmail(identity.Name);
             var response = new
             {
                 access_token = encodedJwt,
-                id = _dataRepository.GetUserIdByEmail(identity.Name)
+                id = user.Id,
+                firstName = user.FirstName,
+                lastName = user.LastName,
             };
             
             return new JsonResult(response);

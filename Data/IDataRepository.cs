@@ -12,7 +12,8 @@ namespace Profound.Data
         // GET Methods
         IEnumerable<Role> GetRoles();
         IEnumerable<User> GetUsers();
-        IEnumerable<Course> GetCourses();
+        IEnumerable<GetCourseViewModel> GetCourses();
+        IEnumerable<Category> GetCategories();
 
         IEnumerable<Module> GetCourseModules(int courseId);
         IEnumerable<Lesson> GetModuleLessons(int moduleId);
@@ -23,13 +24,13 @@ namespace Profound.Data
         User LoginUser(string email, string password);
         void RegisterUser(RegisterViewModel model);
 
-        int GetUserIdByEmail(string email);
+        User GetUserByEmail(string email);
         int GetCoursesCompletedByUser(int courseId, int userId);
 
         bool IsEnrolled(int userId, int courseId);
         User GetUser(int userId);
         LessonViewModel GetLesson(int lessonId, int userId);
-        Course GetCourse(int courseId);
+        GetCourseViewModel GetCourse(int courseId);
         Course GetBaseCourse(int courseId);
         int GetLastLessonId(int courseId, int userId);
         void PostLesson(PostLessonViewModel model);
