@@ -52,7 +52,7 @@ namespace Profound.Controllers
                 id = user.Id,
                 firstName = user.FirstName,
                 lastName = user.LastName,
-                role = user.Role.RoleName
+                role = _dataRepository.GetRoleByUserId(user.Id)?.RoleName
             };
             
             return new JsonResult(response);

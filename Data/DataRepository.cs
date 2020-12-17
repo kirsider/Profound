@@ -120,6 +120,19 @@ namespace Profound.Data
             }
         }
 
+        public Role GetRoleByUserId(int userId)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                return connection.QueryFirstOrDefault<Role>(
+                    @"SELECT r.id, r.role as roleName FROM Role AS r 
+                    JOIN user AS u ON(u.role_id = r.id) WHERE u.id = @UserId;",
+                    new { UserId = userId }
+                );
+            }
+        }
+
         public IEnumerable<GetCourseViewModel> GetCourses()
         {
             using (var connection = new MySqlConnection(_connectionString))

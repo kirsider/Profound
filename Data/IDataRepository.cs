@@ -46,6 +46,8 @@ namespace Profound.Data
         CourseStats GetCourseStats(int courseId, int offset, int limit);
         ComponentStats GetComponentStats(int componentId);
 
+        Role GetRoleByUserId(int userId);
+
 
         // POST Methods
         Comment PostComment(Comment comment);
