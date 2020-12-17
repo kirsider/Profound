@@ -51,14 +51,20 @@ namespace Profound.Controllers
 
             var courseCategories = _dataRepository.GetCourseCategories(courseId);
             var identity = User.Identity;
-            if (identity.Name == null)
+
+            int lastLessonId = 0;
+            var user = _dataRepository.GetUserByEmail(identity.Name);
+            if (user == null)
             {
-                return Unauthorized("Error 401. Please, authorize first to get access to this resource.");
+                return Unauthorized(new UserCourseViewModel
+                {
+                    Course = course,
+                    CourseCategories = courseCategories.ToList(),
+                    LastLessonId = lastLessonId
+                });
             }
 
-            var userId = _dataRepository.GetUserByEmail(identity.Name).Id;
-            var lastLessonId = _dataRepository.GetLastLessonId(courseId, userId);
-
+            lastLessonId = _dataRepository.GetLastLessonId(courseId, user.Id);
             return Ok(new UserCourseViewModel
             {
                 Course = course,
