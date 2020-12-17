@@ -98,7 +98,8 @@ namespace Profound.Controllers
         [HttpPost("lessons")]
         public ActionResult PostLesson(PostLessonViewModel model)
         {
-            _dataRepository.PostLesson(model);
+            int userId = _dataRepository.GetUserByEmail(User.Identity.Name).Id;
+            _dataRepository.PostLesson(model, userId);
             return Ok();
         }
 

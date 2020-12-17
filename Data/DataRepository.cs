@@ -689,21 +689,21 @@ namespace Profound.Data
             }
         }
 
-        public void PostLesson(PostLessonViewModel model)
+        public void PostLesson(PostLessonViewModel model, int userId)
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
                 int lessonPoints = 0;
-                int userId = 0;
+                //int userId = GetUserByEmail(User.Identity.Name);
                 connection.Open();
                 foreach (var solution in model.Solutions)
                 {
                     connection.Execute(
                         @"INSERT INTO user_solution(component_id, user_id, `status`, points, answer)
                                 VALUES(@ComponentId, @UserId, @Status, @Points, @Answer);",
-                        new { solution.ComponentId, solution.UserId, solution.Status, solution.Points, solution.Answer }
+                        new { solution.ComponentId, userId, solution.Status, solution.Points, solution.Answer }
                     );
-                    userId = solution.UserId;
+                    //userId = solution.UserId;
                     lessonPoints += solution.Points;
                 }
                 connection.Execute(

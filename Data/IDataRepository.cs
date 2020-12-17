@@ -35,7 +35,7 @@ namespace Profound.Data
         double GetCourseProgress(int courseId, int userId);
         Course GetBaseCourse(int courseId);
         int GetLastLessonId(int courseId, int userId);
-        void PostLesson(PostLessonViewModel model);
+        void PostLesson(PostLessonViewModel model, int userId);
         void CompleteCourse(CompleteCourseViewModel model);
 
         void DeleteModule(int module_id);
