@@ -11,6 +11,7 @@ namespace Profound.Data.Models
         public int UserId { get; set; }
         public int ComponentId { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string Creator { get; set; }
         public string Text { get; set; }
     }
 }

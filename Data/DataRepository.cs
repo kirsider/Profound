@@ -323,8 +323,9 @@ namespace Profound.Data
             {
                 connection.Open();
                 return connection.Query<Comment>(
-                    @"SELECT id, user_id AS userId, component_id AS componentId, `text`, created_at AS createdAt
-                    FROM Comment WHERE component_id=@ComponentId;", new { ComponentId = componentId }
+                    @"SELECT c.id, c.user_id AS userId, CONCAT(u.first_name, ' ', u.last_name) AS creator, 
+                    c.component_id AS componentId, c.`text`, c.created_at AS createdAt
+                    FROM Comment c JOIN user u ON(c.user_id = u.id) WHERE component_id=@ComponentId;", new { ComponentId = componentId }
                 );
             }
         }
@@ -439,8 +440,9 @@ namespace Profound.Data
             {
                 connection.Open();
                 return connection.QueryFirstOrDefault<Comment>(
-                    @"SELECT id, user_id AS userId, component_id AS componentId, `text`, created_at AS createdAt 
-                        FROM Comment WHERE id=@CommentId;",
+                    @"SELECT c.id, c.user_id AS userId, CONCAT(u.first_name, ' ', u.last_name) AS creator,
+                        c.component_id AS componentId, c.`text`, c.created_at AS createdAt 
+                        FROM Comment c JOIN user u ON (c.user_id = u.id) WHERE id=@CommentId;",
                     new { CommentId = commentId }
                 );
             }
