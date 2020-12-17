@@ -54,17 +54,11 @@ namespace Profound.Controllers
 
             int lastLessonId = 0;
             var user = _dataRepository.GetUserByEmail(identity.Name);
-            if (user == null)
+            if (user != null)
             {
-                return Unauthorized(new UserCourseViewModel
-                {
-                    Course = course,
-                    CourseCategories = courseCategories.ToList(),
-                    LastLessonId = lastLessonId
-                });
+                lastLessonId = _dataRepository.GetLastLessonId(courseId, user.Id);
             }
 
-            lastLessonId = _dataRepository.GetLastLessonId(courseId, user.Id);
             return Ok(new UserCourseViewModel
             {
                 Course = course,
