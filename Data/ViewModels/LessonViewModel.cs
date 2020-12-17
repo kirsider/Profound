@@ -13,6 +13,8 @@ namespace Profound.Data.ViewModels
         public string Name { get; set; }
 
         public int Order { get; set; }
-        public IEnumerable<ComponentViewModel> Components { get; set; }
+
+        public bool Completed { get; set; }
+        public IEnumerable<ComponentViewModel> Components { get; set; }        
     }
 }

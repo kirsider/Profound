@@ -303,12 +303,16 @@ namespace Profound.Data
 
                 if (lesson != null)
                 {
+                    var count = connection.ExecuteScalar<int>(@"SELECT COUNT(id) FROM user_solution WHERE user_id=@UserId 
+                        AND component_id IN (SELECT id FROM component WHERE lesson_id = @LessonId);",
+                        new {UserId = userId, LessonId = lessonId });
                     lessonVM = new LessonViewModel
                     {
                         Id = lesson.Id,
                         ModuleId = lesson.ModuleId,
                         Name = lesson.Name,
-                        Order = lesson.Order
+                        Order = lesson.Order,
+                        Completed = count == 0 ? false : true
                     };
                     lessonVM.Components = GetComponents(lessonId, userId);
                 }
