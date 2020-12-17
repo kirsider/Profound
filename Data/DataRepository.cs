@@ -564,6 +564,11 @@ namespace Profound.Data
             using (var connection = new MySqlConnection(_connectionString))
             {
                 connection.Open();
+                var lastModuleOrder = connection.ExecuteScalar<int>(
+                    @"SELECT MAX(`order`) FROM module WHERE course_id=@CourseId;",
+                    new { CourseId = module.CourseId });
+                module.Order = ++lastModuleOrder;
+
                 var moduleId = Convert.ToInt32(connection.ExecuteScalar(
                     @"INSERT INTO Module(course_id, `name`, `order`) 
                         VALUES(@CourseId, @Name, @Order);
