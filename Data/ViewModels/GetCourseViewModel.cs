@@ -16,6 +16,7 @@ namespace Profound.Data.ViewModels
         public double AcceptancePercantage { get; set; }
         public double Progress { get; set; }
         public string Status { get; set; }
+        public string RejectMessage { get; set; }
 
         public string Requirements { get; set; }
 
