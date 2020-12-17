@@ -128,7 +128,7 @@ namespace Profound.Data
                 var courses = connection.Query<Course>(
                     @"SELECT id, creator_id AS creatorId, `title`, description, price, 
                         acceptance_percantage AS acceptancePercantage, requirements, 
-                        `status`, published_at AS publishedAt FROM Course;"
+                        `status`, published_at AS publishedAt, reject_message AS rejectMessage FROM Course;"
                 );
 
                 if (courses == null) return null;
@@ -152,6 +152,7 @@ namespace Profound.Data
                         Price = course.Price,
                         AcceptancePercantage = course.AcceptancePercantage,
                         Status = course.Status,
+                        RejectMessage = course.RejectMessage,
                         Requirements = course.Requirements,
                         PublishedAt = course.PublishedAt
                     });
@@ -168,7 +169,7 @@ namespace Profound.Data
                 var courses = connection.Query<Course>(
                     @"SELECT c.id, creator_id AS creatorId, `title`, description, price, 
                         acceptance_percantage AS acceptancePercantage, requirements, 
-                        c.`status`, published_at AS publishedAt FROM course AS c
+                        c.`status`, published_at AS publishedAt, reject_message AS rejectMessage  FROM course AS c
                          JOIN user_course_enrollment AS uc ON(c.id = uc.course_id)
                          WHERE uc.user_id = @UserId;", new { UserId = userId }
                 );
@@ -195,6 +196,7 @@ namespace Profound.Data
                         AcceptancePercantage = course.AcceptancePercantage,
                         Progress = GetCourseProgress(course.Id, userId),
                         Status = course.Status,
+                        RejectMessage = course.RejectMessage,
                         Requirements = course.Requirements,
                         PublishedAt = course.PublishedAt
                     });
@@ -334,7 +336,7 @@ namespace Profound.Data
                 var course = connection.QueryFirstOrDefault<Course>(
                     @"SELECT id, creator_id AS creatorId, `title`, description, `price`, 
                         acceptance_percantage AS acceptancePercantage, requirements, 
-                        `status`, published_at AS publishedAt FROM Course
+                        `status`, published_at AS publishedAt, reject_message AS rejectMessage FROM Course
                     WHERE id=@CourseId;", new { CourseId = courseId }
                 );
 
@@ -368,6 +370,7 @@ namespace Profound.Data
                     Status = baseCourse.Status,
                     Requirements = baseCourse.Requirements,
                     PublishedAt = baseCourse.PublishedAt,
+                    RejectMessage = baseCourse.RejectMessage,
                     Modules = GetCourseModules(courseId)
                 };
             }
@@ -455,9 +458,18 @@ namespace Profound.Data
             }
         }
 
-        public void RejectCourse(int course_id)
+        public void RejectCourse(string rejectMessage, int course_id)
         {
             ChangeCourseStatus("dev", course_id);
+
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                connection.Execute(
+                    @"UPDATE Course SET reject_message = @RejectMessage WHERE id=@CourseId;",
+                    new { RejectMessage = rejectMessage, CourseId = course_id }
+                );
+            }
         }
 
         public void RequestToPublish(int course_id)
@@ -471,7 +483,7 @@ namespace Profound.Data
             {
                 connection.Open();
                 connection.Execute(
-                    @"UPDATE Course SET published_at=@PublishedAt WHERE id=@CourseId;",
+                    @"UPDATE Course SET published_at=@PublishedAt, reject_message = NULL WHERE id=@CourseId;",
                     new { PublishedAt = DateTime.Now, CourseId = courseId }
                 );
             }

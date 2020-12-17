@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Profound.Data;
+using Profound.Data.ViewModels;
 
 namespace Profound.Controllers
 {
@@ -34,12 +35,12 @@ namespace Profound.Controllers
         }
 
         [HttpPost("{courseId}/reject")]
-        public ActionResult RejectCourse(int courseId)
+        public ActionResult RejectCourse(int courseId, [FromBody] RejectCourseViewModel vm)
         {
             var course = _dataRepository.GetBaseCourse(courseId);
             if (course != null)
             {
-                _dataRepository.RejectCourse(courseId);
+                _dataRepository.RejectCourse(vm.RejectMessage, courseId);
                 return Ok();
             }
             return NotFound();
