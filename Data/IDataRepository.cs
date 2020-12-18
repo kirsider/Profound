@@ -26,7 +26,7 @@ namespace Profound.Data
         void RegisterUser(RegisterViewModel model);
 
         User GetUserByEmail(string email);
-        int GetCoursesCompletedByUser(int courseId, int userId);
+        int GetCoursesCompletedByUser(int userId);
 
         bool IsEnrolled(int userId, int courseId);
         User GetUser(int userId);

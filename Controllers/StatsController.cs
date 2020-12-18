@@ -53,15 +53,9 @@ namespace Profound.Controllers
         }
 
 
-        [HttpGet("course/{courseId}/achievement")]
-        public ActionResult<AchievementViewModel> GetUserRank(int courseId)
+        [HttpGet("achievements")]
+        public ActionResult<AchievementViewModel> GetUserRank()
         {
-            Course course = _dataRepository.GetBaseCourse(courseId);
-            if (course == null)
-            {
-                return NotFound();
-            }
-
             var identity = User.Identity;
             if (identity.Name == null)
             {
@@ -69,7 +63,7 @@ namespace Profound.Controllers
             }
 
             var userId = _dataRepository.GetUserByEmail(identity.Name).Id;
-            var completedAmount = _dataRepository.GetCoursesCompletedByUser(courseId, userId);
+            var completedAmount = _dataRepository.GetCoursesCompletedByUser(userId);
 
             if (completedAmount < (int)Ranks.Amateur)
                 return new AchievementViewModel{ Rank = Ranks.Newbie.ToString()};
