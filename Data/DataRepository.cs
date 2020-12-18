@@ -479,7 +479,7 @@ namespace Profound.Data
 
         public void RejectCourse(string rejectMessage, int course_id)
         {
-            ChangeCourseStatus("dev", course_id);
+            ChangeCourseStatus("rejected", course_id);
 
             using (var connection = new MySqlConnection(_connectionString))
             {
@@ -612,13 +612,15 @@ namespace Profound.Data
                     }
                 ));
                 module.Id = moduleId;
-                foreach (var lesson in module.Lessons)
+                if (module.Lessons != null)
                 {
-                    lesson.ModuleId = module.Id;
-                    var createdLesson = CreateLesson(lesson);
-                    lesson.Id = createdLesson.Id;
+                    foreach (var lesson in module.Lessons)
+                    {
+                        lesson.ModuleId = module.Id;
+                        var createdLesson = CreateLesson(lesson);
+                        lesson.Id = createdLesson.Id;
+                    }
                 }
-
                 return module;
             }
         }
@@ -641,13 +643,15 @@ namespace Profound.Data
                 ));
 
                 lesson.Id = lessonId;
-                foreach (var component in lesson.Components)
+                if (lesson.Components != null)
                 {
-                    component.LessonId = lesson.Id;
-                    var createdComponent = CreateComponent(component);
-                    component.Id = createdComponent.Id;
+                    foreach (var component in lesson.Components)
+                    {
+                        component.LessonId = lesson.Id;
+                        var createdComponent = CreateComponent(component);
+                        component.Id = createdComponent.Id;
+                    }
                 }
-
                 return lesson;
             }
         }
@@ -693,8 +697,7 @@ namespace Profound.Data
         {
             using (var connection = new MySqlConnection(_connectionString))
             {
-                int lessonPoints = 0;
-                //int userId = GetUserByEmail(User.Identity.Name);
+                int lessonPoints = 0;                
                 connection.Open();
                 foreach (var solution in model.Solutions)
                 {
@@ -702,8 +705,7 @@ namespace Profound.Data
                         @"INSERT INTO user_solution(component_id, user_id, `status`, points, answer)
                                 VALUES(@ComponentId, @UserId, @Status, @Points, @Answer);",
                         new { solution.ComponentId, userId, solution.Status, solution.Points, solution.Answer }
-                    );
-                    //userId = solution.UserId;
+                    );                    
                     lessonPoints += solution.Points;
                 }
                 connection.Execute(

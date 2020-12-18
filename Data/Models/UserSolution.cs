@@ -8,8 +8,7 @@ namespace Profound.Data.Models
     public class UserSolution
     {
         public int Id { get; set; }
-        public int ComponentId { get; set; }
-        //public int UserId { get; set; }
+        public int ComponentId { get; set; }        
         public string Status { get; set; }
         public int Points { get; set; }
 

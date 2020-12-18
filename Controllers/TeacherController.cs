@@ -68,8 +68,8 @@ namespace Profound.Controllers
         [HttpPost("course/modules")]
         public ActionResult<Course> CreateModule(Module module)
         {
-            var course = _dataRepository.CreateModule(module);
-            return CreatedAtAction("CreateModule", module);
+            var res_module = _dataRepository.CreateModule(module);
+            return CreatedAtAction("CreateModule", res_module);
         }
 
         [HttpDelete("course/modules/{moduleId}")]
